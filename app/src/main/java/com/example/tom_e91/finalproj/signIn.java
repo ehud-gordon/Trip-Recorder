@@ -33,7 +33,7 @@ public class signIn extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_signin);
 
         // configures UI components
         signInText = findViewById(R.id.signinText);
@@ -45,12 +45,9 @@ public class signIn extends AppCompatActivity {
         // Set TextWatchers
         watchTextChanges(emailText);
         watchTextChanges(passText);
-
-
     }
 
-    public void loginButtonOnClick(View view)
-    {
+    public void loginButtonOnClick(View view) {
         // Makes sure for valid input
         if (isValidInput()) {
             startActivity(new Intent(this, Home.class));
@@ -79,11 +76,8 @@ public class signIn extends AppCompatActivity {
         });
     }
 
-    private boolean isValidInput()
-    {
-
+    private boolean isValidInput() {
         boolean returnValue = true;
-
         String currentStatus = ""; // String represents the current status
 
         // Checks whether the editText contains a valid Email address
@@ -108,14 +102,12 @@ public class signIn extends AppCompatActivity {
     }
 
 
-    private boolean checkEMailValidity (String emailAddr)
-    {
+    private boolean checkEMailValidity (String emailAddr) {
         String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
         return emailAddr.matches(regex);
     }
 
-    private boolean checkPassword (String pwd)
-    {
+    private boolean checkPassword (String pwd) {
         // TODO- METHOD for checking PASSWORD validity
 //        String pattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}";
 //        return pwd.matches(pattern);
