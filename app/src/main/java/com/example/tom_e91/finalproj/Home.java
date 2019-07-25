@@ -25,7 +25,7 @@ public class Home extends AppCompatActivity {
 
 
     public void onPreviousTripsButtonClick(View view) {
-        Intent previousTripsIntent = new Intent(this, PreviousTrips.class);
+        Intent previousTripsIntent = new Intent(this, PreviousTripsActivity.class);
         startActivity(previousTripsIntent);
         // TODO create intent to get to Previous Trips Activity
     }

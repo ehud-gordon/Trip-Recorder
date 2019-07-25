@@ -5,9 +5,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.example.tom_e91.finalproj.adapters.PreviousTripsListAdapter;
+
 import java.util.LinkedList;
 
-public class PreviousTrips extends AppCompatActivity {
+public class PreviousTripsActivity extends AppCompatActivity {
     final LinkedList<Trip> tripList = new LinkedList<>();
     PreviousTripsListAdapter adapter;
 

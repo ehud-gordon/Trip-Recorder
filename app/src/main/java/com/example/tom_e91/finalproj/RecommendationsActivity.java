@@ -4,15 +4,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.widget.Button;
-import android.widget.EditText;
 
 import java.util.ArrayList;
 
-public class Recommendations extends AppCompatActivity implements RecommendationRecyclerUtils.RecommendClickCallback
+public class RecommendationsActivity extends AppCompatActivity implements RecommendationRecyclerUtils.RecommendClickCallback
 {
     // Define a LOG TAG
-    private static final String LOG_TAG = Recommendations.class.getSimpleName();
+    private static final String LOG_TAG = RecommendationsActivity.class.getSimpleName();
 
     // relevant views
     private RecommendationRecyclerUtils.RecommendAdapter adapt;

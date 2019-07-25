@@ -9,16 +9,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".signIn">
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Recommendations" />
-        <activity android:name=".PreviousTrips" />
+        <activity android:name=".RecommendationsActivity" />
+        <activity android:name=".PreviousTripsActivity" />
         <activity android:name=".Home" />
+        <activity android:name=".RegisterActivity"></activity>
     </application>
 
 </manifest>
