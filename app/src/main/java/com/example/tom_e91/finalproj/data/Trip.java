@@ -1,4 +1,4 @@
-package com.example.tom_e91.finalproj;
+package com.example.tom_e91.finalproj.data;
 
 public class Trip {
     int trip_id;
@@ -6,7 +6,7 @@ public class Trip {
     String trip_title;
     Trip() {}
 
-    Trip (int trip_id, String trip_title) {
+    public Trip(int trip_id, String trip_title) {
         this.trip_id = trip_id;
         this.trip_title = trip_title;
     }

@@ -1,10 +1,12 @@
-package com.example.tom_e91.finalproj;
+package com.example.tom_e91.finalproj.ui;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.example.tom_e91.finalproj.R;
+import com.example.tom_e91.finalproj.data.Trip;
 import com.example.tom_e91.finalproj.adapters.PreviousTripsListAdapter;
 
 import java.util.LinkedList;

@@ -6,14 +6,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp"
-    tools:context=".RegisterActivity">
+    tools:context=".ui.RegisterActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/register_text"
+            android:id="@+id/register_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -22,21 +22,21 @@
             android:textSize="24sp" />
 
         <EditText
-            android:id="@+id/register_email_tv"
+            android:id="@+id/register_email_et"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
-            android:layout_below="@id/register_text"
+            android:layout_below="@id/register_tv"
             android:ems="10"
             android:hint="Email"
             android:inputType="textEmailAddress" />
 
         <EditText
-            android:id="@+id/register_pass_tv"
+            android:id="@+id/register_pass_et"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/register_email_tv"
+            android:layout_below="@+id/register_email_et"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:ems="10"
@@ -44,31 +44,31 @@
             android:inputType="textPassword" />
 
         <EditText
-            android:id="@+id/register_confirm_pass_tv"
+            android:id="@+id/register_confirm_pass_et"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_below="@+id/register_pass_tv"
+            android:layout_below="@+id/register_pass_et"
             android:layout_marginTop="20dp"
             android:ems="10"
             android:hint="Confirm Password"
             android:inputType="textPassword" />
 
         <Button
-            android:id="@+id/register_btn"
+            android:id="@+id/register_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/register_confirm_pass_tv"
+            android:layout_below="@id/register_confirm_pass_et"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:text="Reg Here" />
 
         <TextView
-            android:id="@+id/back_to_login_btn"
+            android:id="@+id/back_to_login_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/register_btn"
+            android:layout_below="@id/register_button"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
             android:text="Have an Account? Login"

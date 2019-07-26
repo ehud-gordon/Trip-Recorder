@@ -1,4 +1,4 @@
-package com.example.tom_e91.finalproj;
+package com.example.tom_e91.finalproj.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -9,6 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.example.tom_e91.finalproj.R;
+import com.example.tom_e91.finalproj.data.Recommend;
 
 public class RecommendationRecyclerUtils
 {
@@ -38,7 +41,7 @@ public class RecommendationRecyclerUtils
     } // class MessageCallback
 
 
-    interface RecommendClickCallback
+    public interface RecommendClickCallback
     {
         void onRecommendClick(Recommend recommend);
         //void onRecommendLongClick(Recommend rec);
@@ -46,7 +49,7 @@ public class RecommendationRecyclerUtils
 
 
 
-    static class RecommendAdapter extends ListAdapter<Recommend, RecommendHolder> {
+    public static class RecommendAdapter extends ListAdapter<Recommend, RecommendHolder> {
 
         public RecommendAdapter() { super(new MessageCallback()); }
 

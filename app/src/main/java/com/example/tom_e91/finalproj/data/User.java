@@ -1,11 +1,11 @@
-package com.example.tom_e91.finalproj;
+package com.example.tom_e91.finalproj.data;
 
 public class User {
     private String email, user_id, username;
 
     // ----------------------------- Constructors ---------------------- //
     User() {}
-    User(String email, String user_id, String username) {
+    public User(String email, String user_id, String username) {
         this.email = email;
         this.user_id = user_id;
         this.username = username;

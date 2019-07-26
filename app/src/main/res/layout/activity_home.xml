@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context=".Home">
+    tools:context=".ui.HomeActivity">
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/record_button"
@@ -14,7 +14,6 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
-        android:onClick="onRecordButtonClick"
         app:backgroundTint="@android:color/background_light"
         app:srcCompat="@drawable/record_button" />
 
@@ -34,7 +33,6 @@
         android:id="@+id/view_previous_trips_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="onPreviousTripsButtonClick"
         android:text="View Previous Trips"
         android:textAlignment="center" />
 
