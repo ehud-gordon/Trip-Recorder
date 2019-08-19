@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.tom_e91.finalproj.R;
@@ -27,8 +28,9 @@ import static com.example.tom_e91.finalproj.util.util_func.isEmpty;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String LOG_TAG = "nadir " + RegisterActivity.class.getSimpleName();
-    private EditText emailText, passText, confirmPassText;
-    private FirebaseFirestore db;
+    private EditText mEmailText, mPassText, mConfirmPassText;
+    private FirebaseFirestore mDb;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,13 +38,17 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_register);
 
         // UI Components
-        emailText = findViewById(R.id.register_email_et);
-        passText = findViewById(R.id.register_pass_et);
-        confirmPassText = findViewById(R.id.register_confirm_pass_et);
+        mEmailText = findViewById(R.id.register_email_et);
+        mPassText = findViewById(R.id.register_pass_et);
+        mConfirmPassText = findViewById(R.id.register_confirm_pass_et);
+        mProgressBar = findViewById(R.id.register_progressBar);
+
         findViewById(R.id.register_button).setOnClickListener(this);
         findViewById(R.id.back_to_login_button).setOnClickListener(this);
         // DB
-        db = FirebaseFirestore.getInstance();
+        mDb = FirebaseFirestore.getInstance();
+
+        hideDialog();
     }
 
     @Override
@@ -58,9 +64,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     private void register() {
         // Extract Input
-        String email = emailText.getText().toString();
-        String password = passText.getText().toString();
-        String confirmPassword = confirmPassText.getText().toString();
+        String email = mEmailText.getText().toString();
+        String password = mPassText.getText().toString();
+        String confirmPassword = mConfirmPassText.getText().toString();
         // Register new User
         if (isInputValid(email, password, confirmPassword)) {
             registerNewEmail(email, password);
@@ -69,7 +75,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     private void registerNewEmail(final String email, final String password) {
         Log.d(LOG_TAG, "registerNewEmail() email: " + email + " password: " + password);
-
+        showDialog();
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
@@ -81,7 +87,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
                             // Settings
                             FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().build();
-                            db.setFirestoreSettings(settings);
+                            mDb.setFirestoreSettings(settings);
 
                             // Create User
                             String user_uid = FirebaseAuth.getInstance().getUid();
@@ -91,21 +97,23 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             user_map.put("email", email);
                             user_map.put("username", username);
                             user_map.put("user_uid", user_uid);
-                            DocumentReference newUserRef = db.collection("Users").document(user_uid);
+                            DocumentReference newUserRef = mDb.collection(getString(R.string.collection_users)).document(user_uid);
                             // Add new User to DB
                             newUserRef.set(user_map)
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
-                                        Log.d(LOG_TAG, "newUserRef.set() success added new user to db");
+                                        Log.d(LOG_TAG, "newUserRef.set() success added new user to mDb");
+                                        hideDialog();
+                                        // Change Activity to Login
                                         startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                                     } else {
-                                        Log.d(LOG_TAG, "newUserRef.set() fail to added new user to db: " + task.getException().toString());
-                                        Toast.makeText(RegisterActivity.this, "Registration not Successful", Toast.LENGTH_LONG).show();
+                                        Log.d(LOG_TAG, "newUserRef.set() task not successful to added new user to mDb: " + task.getException().toString());
+                                        Toast.makeText(RegisterActivity.this, "Registration not successful", Toast.LENGTH_LONG).show();
                                     }
                                 }
-                            })
+                            })      // If newUserRef.set() failed
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
@@ -117,10 +125,11 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         }
                     }
                 });
+        hideDialog();
     }
 
     private boolean isInputValid(String email, String password, String confirmPassword) {
-        if (!isEmpty(emailText) && !isEmpty(passText) && !isEmpty(confirmPassText)) {
+        if (!isEmpty(mEmailText) && !isEmpty(mPassText) && !isEmpty(mConfirmPassText)) {
             if (password.equals(confirmPassword)) {
                 return true;
             } else {
@@ -130,5 +139,13 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             Toast.makeText(RegisterActivity.this, "Fill out all fields", Toast.LENGTH_LONG).show();
         }
         return false;
+    }
+
+    private void showDialog(){ mProgressBar.setVisibility(View.VISIBLE); }
+
+    private void hideDialog(){
+        if(mProgressBar.getVisibility() == View.VISIBLE){
+            mProgressBar.setVisibility(View.INVISIBLE);
+        }
     }
 }

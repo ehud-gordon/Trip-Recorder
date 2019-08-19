@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,9 +33,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private static final String LOG_TAG = "nadir " + LoginActivity.class.getSimpleName();
 
     // UI Components
-    TextView statusDisplay;
-    Button loginButton;
-    EditText passText, emailText;
+    private TextView mStatusDisplay;
+    private Button mLoginButton;
+    private EditText mPassText, mEmailText;
+    private ProgressBar mProgressBar;
 
     // Firebase Components
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -44,17 +46,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
         Log.d(LOG_TAG, "onCreate() entered");
         // configures UI components
-        loginButton = findViewById(R.id.login_button);
-        passText = findViewById(R.id.login_password_et);
-        emailText = findViewById(R.id.login_email_et);
-        statusDisplay = findViewById(R.id.statusDisplay);
+        mLoginButton = findViewById(R.id.login_button);
+        mPassText = findViewById(R.id.login_password_et);
+        mEmailText = findViewById(R.id.login_email_et);
+        mStatusDisplay = findViewById(R.id.statusDisplay);
+        mProgressBar = findViewById(R.id.login_progress_bar);
+
         findViewById(R.id.link_register).setOnClickListener(this);
-        loginButton.setOnClickListener(this);
+        mLoginButton.setOnClickListener(this);
 
         // Set TextWatchers
-        watchTextChanges(emailText);
-        watchTextChanges(passText);
-
+        watchTextChanges(mEmailText);
+        watchTextChanges(mPassText);
+        hideDialog();
         setupFirebaseAuth();
     }
 
@@ -62,9 +66,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         switch (view.getId()) {
             case R.id.login_button:
                 login();
-
+                break;
             case R.id.link_register:
                 startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+                break;
         }
     }
 
@@ -76,28 +81,34 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     Log.d(LOG_TAG, "onAuthStateChanged() signed_in, user_uid: " + user.getUid());
+                    Toast.makeText(LoginActivity.this, "Authenticated with: " + user.getEmail(), Toast.LENGTH_SHORT).show();
                     FirebaseFirestore db = FirebaseFirestore.getInstance();
                     FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().build();
                     db.setFirestoreSettings(settings);
 
-                    DocumentReference userRef = db.collection("Users").document(user.getUid());
+                    DocumentReference userRef = db.collection(getString(R.string.collection_users)).document(user.getUid());
                     userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                             if (task.isSuccessful()) {
-                                Log.d(LOG_TAG, "onAuthStateChanged() successfully signed in");
+                                Log.d(LOG_TAG, "userRef.get() successfully signed in");
+                                // Set Application's user to this signed-in user
                                 User user = task.getResult().toObject(User.class);
                                 ((MyApplication)getApplicationContext()).setUser(user);
+                                // Change activity to home
+                                startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                                finish();
                             }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(LOG_TAG, "userRef.get() failure: " + e.toString());
                         }
                     });
 
-                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                    startActivity(intent);
-                    finish();
-
                 } else {
-                    // User is signed out
+                    // if user signed out
                     Log.d(LOG_TAG, "onAuthStateChanged() signed_out");
                 }
             }
@@ -107,8 +118,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void login() {
         // Check valid input
         if (isInputValid()) {
-            String email = emailText.getText().toString();
-            String password = passText.getText().toString();
+            String email = mEmailText.getText().toString();
+            String password = mPassText.getText().toString();
+            showDialog();
             FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -121,6 +133,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
                 }
             });
+            hideDialog();
         }
     }
 
@@ -128,9 +141,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void watchTextChanges(final EditText textEdit) {
         textEdit.addTextChangedListener(new TextWatcher() {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                boolean isEmailEmpty = emailText.getText().toString().isEmpty();
-                boolean isPassEmpty = passText.getText().toString().isEmpty();
-                loginButton.setEnabled((!isEmailEmpty) && (!isPassEmpty));
+                // Enable login button when text fields aren't empty
+                boolean isEmailEmpty = mEmailText.getText().toString().isEmpty();
+                boolean isPassEmpty = mPassText.getText().toString().isEmpty();
+                mLoginButton.setEnabled((!isEmailEmpty) && (!isPassEmpty));
             }
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void afterTextChanged(Editable s) {}
@@ -151,14 +165,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         String currentStatus = ""; // String represents the current status
 
         // Checks whether the editText contains a valid Email address
-        String email = emailText.getText().toString();
+        String email = mEmailText.getText().toString();
         if (!checkEMailValidity(email)) {
             returnValue = false;
             currentStatus += "Need to insert a valid Email address \n";
         }
 
         // Checks whether the editText contains a valid password
-        String pass = passText.getText().toString();
+        String pass = mPassText.getText().toString();
         if (!checkPassword(pass)) {
             returnValue = false;
             currentStatus += "Need to insert a valid password \n";
@@ -167,7 +181,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if (currentStatus.length() == 0) {
             currentStatus += "Ready\n";
         }
-        statusDisplay.setText(currentStatus);
+        mStatusDisplay.setText(currentStatus);
         return returnValue;
     }
 
@@ -178,6 +192,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override protected void onStop() {
         super.onStop();
         FirebaseAuth.getInstance().removeAuthStateListener(mAuthListener);
+    }
+
+    private void showDialog(){ mProgressBar.setVisibility(View.VISIBLE); }
+
+    private void hideDialog(){
+        if(mProgressBar.getVisibility() == View.VISIBLE){
+            mProgressBar.setVisibility(View.INVISIBLE);
+        }
     }
 
 }

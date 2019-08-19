@@ -74,6 +74,15 @@
             android:text="Have an Account? Login"
             android:textColor="@color/colorPrimary" />
 
+        <ProgressBar
+            android:id="@+id/register_progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/register_email_et"
+            android:layout_centerHorizontal="true"
+            tools:visibility="invisible" />
+
     </RelativeLayout>
 
 
