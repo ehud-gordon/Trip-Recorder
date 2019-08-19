@@ -25,12 +25,17 @@ import com.google.firebase.auth.FirebaseAuth;
 
 
 public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
+
+    // Constants
     private static final String LOG_TAG = "nadir " + RegisterActivity.class.getSimpleName();
-    private String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-    private boolean mLocationPermissionGranted = false;
-    private String mErrorMessage = "Problem with location services";
+    private static final int REQUEST_LOCATION_PERMISSION = 1;
     private final static int ERROR_DIALOG_REQUEST = 1001;
     private final static int PERMISSIONS_REQUEST_ENABLE_GPS = 1002;
+
+    // Permissions
+    private String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+    private boolean mLocationPermissionGranted = false;
+
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +50,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
         checkMapServices();
     }
-
+    // TODO move to Map
     private void checkMapServices() {
         if (checkGooglePlayServices()) {
             if (checkGPSProvider()) {
@@ -97,7 +102,11 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void getLocationPermission() {
-        ActivityCompat.requestPermissions(this, permissions, 1);
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_LOCATION_PERMISSION);
+        }
     }
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -110,10 +119,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        mErrorMessage = "App has no Location permissions";
         for (int res: grantResults) {
             if (res != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, permissions, 1);
+                ActivityCompat.requestPermissions(this, permissions, REQUEST_LOCATION_PERMISSION);
             }
         }
         mLocationPermissionGranted = true;
@@ -136,7 +144,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void signOut() {
-        // TODO check if change to MyApplication
+        // TODO check if need to update user in MyApplication
         FirebaseAuth.getInstance().signOut();
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -145,8 +153,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override public void onClick(View view) {
+        // TODO handle case clicked "don't ask me again for permissions"
         if (!mLocationPermissionGranted) {
-            Toast.makeText(this, mErrorMessage, Toast.LENGTH_SHORT).show();
+            checkMapServices();
             return;
         }
         switch (view.getId()) {
@@ -154,7 +163,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(new Intent(this, PreviousTripsActivity.class));
 
             case R.id.record_button:
-                // TODO go to Map Activity
+                startActivity(new Intent(this, MapActivity.class));
                 break;
         }
     }
