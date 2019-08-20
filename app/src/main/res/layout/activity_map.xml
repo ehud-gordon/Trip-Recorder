@@ -33,21 +33,27 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
-                android:id="@+id/map_note_icon"
+                android:id="@+id/map_marker"
+                android:layout_width="35dp"
+                android:layout_height="36dp"
+                app:srcCompat="@mipmap/marker_foreground" />
+
+            <ImageView
+                android:id="@+id/map_note"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/note_icon"
                 app:srcCompat="@android:drawable/ic_menu_edit" />
 
             <ImageView
-                android:id="@+id/map_camera_icon"
+                android:id="@+id/map_camera"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/camera_icon"
                 app:srcCompat="@android:drawable/ic_menu_camera" />
 
             <ImageView
-                android:id="@+id/map_star_icon"
+                android:id="@+id/map_star"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:srcCompat="@android:drawable/btn_star_big_on" />

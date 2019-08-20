@@ -68,9 +68,10 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void bindViews() {
         setContentView(R.layout.activity_map);
         findViewById(R.id.map_stop_button).setOnClickListener(this);
-        findViewById(R.id.map_star_icon).setOnClickListener(this);
-        findViewById(R.id.map_camera_icon).setOnClickListener(this);
-        findViewById(R.id.map_note_icon).setOnClickListener(this);
+        findViewById(R.id.map_star).setOnClickListener(this);
+        findViewById(R.id.map_camera).setOnClickListener(this);
+        findViewById(R.id.map_note).setOnClickListener(this);
+        findViewById(R.id.map_marker).setOnClickListener(this);
     }
 
     @Override public void onMapReady(GoogleMap googleMap) {
@@ -106,7 +107,7 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void checkMovement(Location newLocation) {
         LatLng newLatLng = locToLatLng(newLocation);
-        Log.d(LOG_TAG, String.format("update loc: lat:%f , lng:%f", newLatLng.latitude, newLatLng.longitude));
+        Log.d(LOG_TAG, String.format("update nadirloc: lat: %f , lng: %f", newLatLng.latitude, newLatLng.longitude));
         // First update
         if (mCurrLocation == null) {
             Toast.makeText(StamActivity.this, "first Point!", Toast.LENGTH_SHORT).show();
@@ -118,7 +119,7 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(StamActivity.this, "new Point", Toast.LENGTH_SHORT).show();
                 mCurrLocation = newLocation;
                 // Add a point to route
-                List <LatLng> points = mPolyline.getPoints();
+                List<LatLng> points = mPolyline.getPoints();
                 points.add(newLatLng);
                 mPolyline.setPoints(points);
             }
@@ -136,20 +137,24 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
         };
     }
 
+    @SuppressWarnings("MissingPermission")
     @Override public void onClick(View view) {
         switch (view.getId()) {
             case R.id.map_stop_button:
                 // TODO
-                Toast.makeText(this, "Stop!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "stop", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.map_camera_icon:
+            case R.id.map_camera:
                 Toast.makeText(this, "camera", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.map_star_icon:
-                Toast.makeText(this, "Recommend", Toast.LENGTH_SHORT).show();
+            case R.id.map_star:
+                Toast.makeText(this, "recommend", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.map_note_icon:
-                Toast.makeText(this, "Note", Toast.LENGTH_SHORT).show();
+            case R.id.map_note:
+                Toast.makeText(this, "note", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.map_marker:
+                setMarker(locToLatLng(mCurrLocation), "");
                 break;
         }
     }
