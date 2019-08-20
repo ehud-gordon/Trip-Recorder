@@ -20,6 +20,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -82,6 +83,8 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, permissions, REQUEST_LOCATION_PERMISSION);
             return;
@@ -91,9 +94,16 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
         mFusedLocationProviderClient.requestLocationUpdates(getLocationRequest(), mLocationCallback, null);
     }
 
-    public void setMarker(LatLng latLng, String markerTitle) {
+    public void setMarker(LatLng latLng, String markerTitle, int icon) {
         if (mMap != null) {
-            mMap.addMarker(new MarkerOptions().position(latLng).title(markerTitle));
+            if (icon == 0) {
+                mMap.addMarker(new MarkerOptions().position(latLng).title(markerTitle));
+            }
+            else {
+                mMap.addMarker(new MarkerOptions().position(latLng).title(markerTitle).icon(BitmapDescriptorFactory.fromResource(icon)));
+            }
+
+
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         }
         else {
@@ -139,6 +149,7 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @SuppressWarnings("MissingPermission")
     @Override public void onClick(View view) {
+        LatLng newLatLng = locToLatLng(mCurrLocation);
         switch (view.getId()) {
             case R.id.map_stop_button:
                 // TODO
@@ -146,6 +157,7 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             case R.id.map_camera:
                 Toast.makeText(this, "camera", Toast.LENGTH_SHORT).show();
+                setMarker(newLatLng, "", R.drawable.camera20);
                 break;
             case R.id.map_star:
                 Toast.makeText(this, "recommend", Toast.LENGTH_SHORT).show();
@@ -154,7 +166,7 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(this, "note", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.map_marker:
-                setMarker(locToLatLng(mCurrLocation), "");
+                setMarker(locToLatLng(mCurrLocation), "", 0);
                 break;
         }
     }
