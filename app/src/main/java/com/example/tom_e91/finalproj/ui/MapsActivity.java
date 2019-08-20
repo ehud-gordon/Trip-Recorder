@@ -1,6 +1,7 @@
 package com.example.tom_e91.finalproj.ui;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -28,9 +29,9 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
 
-public class StamActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
     // Constants
-    private static final String LOG_TAG = "nadir " + StamActivity.class.getSimpleName();
+    private static final String LOG_TAG = "nadir " + MapsActivity.class.getSimpleName();
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     private String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
 
@@ -67,7 +68,7 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void bindViews() {
-        setContentView(R.layout.activity_map);
+        setContentView(R.layout.activity_maps);
         findViewById(R.id.map_stop_button).setOnClickListener(this);
         findViewById(R.id.map_star).setOnClickListener(this);
         findViewById(R.id.map_camera).setOnClickListener(this);
@@ -120,13 +121,13 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(LOG_TAG, String.format("update nadirloc: lat: %f , lng: %f", newLatLng.latitude, newLatLng.longitude));
         // First update
         if (mCurrLocation == null) {
-            Toast.makeText(StamActivity.this, "first Point!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "first Point!", Toast.LENGTH_SHORT).show();
             mCurrLocation = newLocation;
             mPolyline = mMap.addPolyline(new PolylineOptions().color(0xff388E3C).add(newLatLng));
 
         } else {
             if (isNewLocation(mCurrLocation, newLocation)) {
-                Toast.makeText(StamActivity.this, "new Point", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "new Point", Toast.LENGTH_SHORT).show();
                 mCurrLocation = newLocation;
                 // Add a point to route
                 List<LatLng> points = mPolyline.getPoints();
@@ -152,25 +153,33 @@ public class StamActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng newLatLng = locToLatLng(mCurrLocation);
         switch (view.getId()) {
             case R.id.map_stop_button:
-                // TODO
-                Toast.makeText(this, "stop", Toast.LENGTH_SHORT).show();
+                // TODO finish activity
+                stopMap();
                 break;
             case R.id.map_camera:
-                Toast.makeText(this, "camera", Toast.LENGTH_SHORT).show();
                 setMarker(newLatLng, "", R.drawable.camera20);
                 break;
             case R.id.map_star:
-                Toast.makeText(this, "recommend", Toast.LENGTH_SHORT).show();
+                getRecommendations();
                 break;
             case R.id.map_note:
-                Toast.makeText(this, "note", Toast.LENGTH_SHORT).show();
+                setMarker(locToLatLng(mCurrLocation), "", R.drawable.note20);
                 break;
             case R.id.map_marker:
                 setMarker(locToLatLng(mCurrLocation), "", 0);
                 break;
         }
     }
+    private void stopMap() {
+        // TODO save Map to JSON
+        Intent toSummaryActivityIntent = new Intent(this, SummaryActivity.class);
+        // TODO add to intent's bundle an indicator for this map's JSON file
+        startActivity(new Intent(this, MapsActivity.class));
+    }
 
+    private void getRecommendations() {
+        // TODO
+    }
     private boolean isNewLocation(Location currPos, Location newPos) {
         double tol = 0.0001;
         return (Math.abs(currPos.getLatitude() - newPos.getLatitude()) > tol

@@ -162,7 +162,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(new Intent(this, PreviousTripsActivity.class));
 
             case R.id.record_button:
-                startActivity(new Intent(this, MapActivity.class));
+                startActivity(new Intent(this, MapsActivity.class));
                 break;
         }
     }
