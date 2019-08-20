@@ -50,6 +50,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
         checkMapServices();
     }
+
     // TODO move to Map
     private void checkMapServices() {
         if (checkGooglePlayServices()) {
@@ -102,9 +103,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void getLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, permissions, REQUEST_LOCATION_PERMISSION);
         }
     }
