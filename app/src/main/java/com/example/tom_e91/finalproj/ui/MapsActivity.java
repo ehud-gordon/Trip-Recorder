@@ -157,7 +157,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 stopMap();
                 break;
             case R.id.map_camera:
-                setMarker(newLatLng, "", R.drawable.camera20);
+                setMarker(newLatLng, "Loc", R.drawable.camera20);
                 break;
             case R.id.map_star:
                 getRecommendations();
