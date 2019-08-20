@@ -22,6 +22,7 @@
             tools:context=".ui.MapActivity" />
 
         <LinearLayout
+            android:id="@+id/linearLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -59,6 +60,43 @@
                 app:srcCompat="@android:drawable/btn_star_big_on" />
 
         </LinearLayout>
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="272dp"
+            android:layout_height="350dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:background="#f6e366"
+            android:elevation="2dp"
+            android:ems="10"
+            android:gravity="top|left"
+            android:hint="Enter a Note.."
+            android:inputType="text|textEmailAddress|textShortMessage|textPersonName"
+            android:textAlignment="textStart"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.094"
+            app:layout_constraintStart_toEndOf="@+id/linearLayout"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/finishButton"
+            android:layout_width="wrap_content"
+            android:layout_height="37dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:elevation="2dp"
+            android:onClick="finishButtonOnClick"
+            android:text="Finish"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/map"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText" />
 
     </android.support.constraint.ConstraintLayout>
 

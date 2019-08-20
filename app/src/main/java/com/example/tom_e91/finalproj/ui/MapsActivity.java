@@ -1,6 +1,7 @@
 package com.example.tom_e91.finalproj.ui;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -9,9 +10,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.tom_e91.finalproj.R;
+import com.example.tom_e91.finalproj.adapters.CustomInfoNoteWindowAdapter;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -23,6 +28,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -52,6 +58,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int DEFAULT_ZOOM = 18;
     // Trip
     private Polyline mPolyline;
+
+    // Views
+    EditText eText;
+    Button finishButton;
 
 
 
@@ -83,9 +93,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Toast.makeText(this, "Google Maps unavailable", Toast.LENGTH_SHORT).show();
             return;
         }
+
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.setInfoWindowAdapter(new CustomInfoNoteWindowAdapter(this));
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, permissions, REQUEST_LOCATION_PERMISSION);
             return;
@@ -95,13 +108,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mFusedLocationProviderClient.requestLocationUpdates(getLocationRequest(), mLocationCallback, null);
     }
 
-    public void setMarker(LatLng latLng, String markerTitle, int icon) {
+    public void setMarker(LatLng latLng, String markerTitle, int icon, String tag) {
         if (mMap != null) {
             if (icon == 0) {
-                mMap.addMarker(new MarkerOptions().position(latLng).title(markerTitle));
+                Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).title(markerTitle));
+                marker.setTag(tag);
             }
             else {
-                mMap.addMarker(new MarkerOptions().position(latLng).title(markerTitle).icon(BitmapDescriptorFactory.fromResource(icon)));
+                Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).title(markerTitle).icon(BitmapDescriptorFactory.fromResource(icon)));
+                marker.setTag(tag);
             }
 
 
@@ -157,19 +172,40 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 stopMap();
                 break;
             case R.id.map_camera:
-                setMarker(newLatLng, "Loc", R.drawable.camera20);
+                setMarker(newLatLng, "Loc", R.drawable.camera20,getString(R.string.tag_camera));
                 break;
             case R.id.map_star:
                 getRecommendations();
                 break;
             case R.id.map_note:
-                setMarker(locToLatLng(mCurrLocation), "", R.drawable.note20);
+                eText =  (EditText) findViewById(R.id.editText);
+                eText.setVisibility(View.VISIBLE);
+                finishButton = (Button) findViewById(R.id.finishButton);
+                finishButton.setVisibility(View.VISIBLE);
+
                 break;
             case R.id.map_marker:
-                setMarker(locToLatLng(mCurrLocation), "", 0);
+                setMarker(locToLatLng(mCurrLocation), "", 0, "");
                 break;
         }
     }
+
+    public void finishButtonOnClick(View view) {
+        String content = eText.getText().toString();
+        if (content.isEmpty()) {
+            Context context = getApplicationContext();
+            CharSequence text = "you can't send an empty note!..you must say something";
+            int duration = Toast.LENGTH_SHORT;
+            Toast.makeText(context, text, duration).show();
+        }
+        else {
+            eText.getText().clear();
+            setMarker(locToLatLng(mCurrLocation), content, R.drawable.note20, getString(R.string.tag_note));
+            eText.setVisibility(View.INVISIBLE);
+            finishButton.setVisibility(View.INVISIBLE);
+        }
+    }
+
     private void stopMap() {
         // TODO save Map to JSON
         Intent toSummaryActivityIntent = new Intent(this, SummaryActivity.class);

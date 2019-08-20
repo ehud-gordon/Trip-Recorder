@@ -11,4 +11,7 @@
     <string name="note_icon">note icon</string>
     <string name="camera_icon">camera icon</string>
     <string name="star_icon">star icon</string>
+    <string name="tag_camera">camera</string>
+    <string name="tag_note">note</string>
+    <string name="info_window_description">info window description</string>
 </resources>
