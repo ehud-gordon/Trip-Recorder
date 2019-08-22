@@ -1,4 +1,4 @@
-package com.example.tom_e91.finalproj.data;
+package com.example.tom_e91.finalproj.models;
 
 public class Recommend
 {

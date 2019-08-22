@@ -2,7 +2,7 @@ package com.example.tom_e91.finalproj;
 
 import android.app.Application;
 
-import com.example.tom_e91.finalproj.data.User;
+import com.example.tom_e91.finalproj.models.User;
 
 public class MyApplication extends Application {
     private User user = null;

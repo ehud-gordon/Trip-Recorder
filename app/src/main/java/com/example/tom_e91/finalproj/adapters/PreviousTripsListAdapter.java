@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.tom_e91.finalproj.R;
-import com.example.tom_e91.finalproj.data.Trip;
+import com.example.tom_e91.finalproj.models.Trip;
 
 import java.util.LinkedList;
 
