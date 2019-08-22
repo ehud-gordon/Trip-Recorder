@@ -3,11 +3,14 @@ package com.example.tom_e91.finalproj.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.example.tom_e91.finalproj.MyApplication;
 import com.example.tom_e91.finalproj.R;
+import com.example.tom_e91.finalproj.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 
 
@@ -25,6 +28,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_home);
         findViewById(R.id.record_button).setOnClickListener(this);
         findViewById(R.id.view_previous_trips_button).setOnClickListener(this);
+
+        // Example Usage of MyApplication
+        User curUser = ((MyApplication) getApplicationContext()).getUser();
+        Log.d(LOG_TAG, String.format("User email is: %s", curUser.getEmail()));
     }
 
     @Override
@@ -32,6 +39,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         switch (view.getId()) {
             case R.id.view_previous_trips_button:
                 startActivity(new Intent(this, PreviousTripsActivity.class));
+                break;
 
             case R.id.record_button:
                 startActivity(new Intent(this, MapsActivity.class));

@@ -13,10 +13,12 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -26,7 +28,7 @@ import android.widget.Toast;
 
 import com.example.tom_e91.finalproj.R;
 import com.example.tom_e91.finalproj.adapters.CustomInfoWindowAdapter;
-import com.example.tom_e91.finalproj.models.MarkerData;
+import com.example.tom_e91.finalproj.models.MarkerTag;
 import com.example.tom_e91.finalproj.util.util_func;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -45,9 +47,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
+
     // Constants
     private static final String LOG_TAG = "nadir " + MapsActivity.class.getSimpleName();
     private static final int PERMISSION_LOCATION_CODE = 1;
@@ -55,26 +62,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int INTENT_IMAGE_CAPTURE_CODE = 1000;
     private final static int INTENT_ENABLE_GPS_CODE = 1001;
     private final static int INTENT_APP_SETTINGS_CODE = 1002;
+
     // Maps
     GoogleMap mMap;
-    // Points
-    LatLng p1 = new LatLng(31.773448, 35.199189);
-    LatLng p2 = new LatLng(31.774876, 35.198846);
-    LatLng p3 = new LatLng(31.775825, 35.198535);
-    LatLng p4 = new LatLng(31.776536, 35.198353);
+
+    // Points googleplex
+    LatLng p1 = new LatLng(37.422, -122.084);
+    LatLng p2 = new LatLng(37.4223, -122.084);
+    LatLng p3 = new LatLng(37.4226, -122.084);
+    LatLng p4 = new LatLng(37.4229, -122.084);
+
     private final LatLng mDefaultLocation = p1; // A default location
     private static final int DEFAULT_ZOOM = 18;
+
     // Views
     EditText noteEditText;
     Button noteFinishButton;
+
     // Permissions
     private boolean mStoragePermissionGranted = false;
+
     // Location
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private Location mCurrLocation;
     private LocationCallback mLocationCallback;
+
     // Trip
     private Polyline mPolyline;
+    private String mCurrPhotoPath;
 
     // ------------------------------- LifeCycle ------------------------------- //
 
@@ -126,15 +141,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             case INTENT_IMAGE_CAPTURE_CODE:
                 if (resultCode == RESULT_OK) {
+                    Log.d(LOG_TAG, "onActivityResult(), RESULT_OK");
                     // Create marker with the resulting bitmap image
-                    LatLng latLng = util_func.locToLatLng(mCurrLocation);
                     Bundle extras = data.getExtras();
                     Bitmap imageBitmap = (Bitmap) extras.get("data");
-                    MarkerData tag = new MarkerData(getString(R.string.tag_camera)).setBitmap(imageBitmap);
+                    MarkerTag tag = new MarkerTag(getString(R.string.tag_camera)).setBitmap(imageBitmap);
+                    LatLng latLng = util_func.locToLatLng(mCurrLocation);
                     setMarker(latLng, "Loc", R.drawable.camera_color25, tag);
-                } else {
-                    Toast.makeText(this, "Camera failed", Toast.LENGTH_SHORT).show();
-                    Log.d(LOG_TAG, "onActivityResult, IMAGE_CAPTURE failed");
+                }
+                else {
+                    Toast.makeText(this, "No image was captured", Toast.LENGTH_SHORT).show();
+                    Log.d(LOG_TAG, "onActivityResult(), RESULT failed");
                 }
 
             case INTENT_APP_SETTINGS_CODE:
@@ -147,10 +164,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // ------------------------------- Permissions ------------------------------- //
-
-    private boolean isLocationPermissionGranted() {
-        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-    }
 
     private boolean checkMapServices() {
         return checkGooglePlayServices() && checkGPSProvider() && requestLocationPermission();
@@ -247,12 +260,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         final Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-//        i.addCategory(Intent.CATEGORY_DEFAULT);
         i.setData(Uri.parse("package:" + context.getPackageName()));
-//        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-//        i.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         context.startActivityForResult(i, INTENT_APP_SETTINGS_CODE);
+    }
+
+    private boolean isLocationPermissionGranted() {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     // ------------------------------- Map Setup ------------------------------- //
@@ -309,7 +322,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // ------------------------------- Location -------------------------------//
 
-    public void setMarker(LatLng latLng, String markerTitle, int icon, MarkerData tag) {
+    public void setMarker(LatLng latLng, String markerTitle, int icon, MarkerTag tag) {
         if (icon == 0) { // Default marker
             mMap.addMarker(new MarkerOptions().position(latLng).title(markerTitle)).setTag(tag);
         } else { // Custom icon
@@ -367,7 +380,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
 
             case R.id.map_marker:
-                setMarker(util_func.locToLatLng(mCurrLocation), "", 0, new MarkerData("marker"));
+                setMarker(util_func.locToLatLng(mCurrLocation), "", 0, new MarkerTag("marker"));
                 break;
 
         }
@@ -375,10 +388,40 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // If this device has a camera
+        // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, INTENT_IMAGE_CAPTURE_CODE);
         }
+    }
+
+    private void dispatchTakePictureIntentFullSize() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                Log.d(LOG_TAG, "dispatchTakePictureIntent(), IOException" + ex.toString());
+            }
+            if (photoFile != null) {
+                mCurrPhotoPath = photoFile.getAbsolutePath();
+                Uri photoURI = FileProvider.getUriForFile(this,"com.example.tom_e91.finalproj.fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, INTENT_IMAGE_CAPTURE_CODE);
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException{
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        // Create File
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+        return image;
     }
 
     public void finishButtonOnClick(View view) {
@@ -387,7 +430,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Toast.makeText(this, "Write something!", Toast.LENGTH_SHORT).show();
         } else {
             noteEditText.getText().clear();
-            setMarker(util_func.locToLatLng(mCurrLocation), content, R.drawable.note20, new MarkerData(getString(R.string.tag_note)));
+            setMarker(util_func.locToLatLng(mCurrLocation), content, R.drawable.note20, new MarkerTag(getString(R.string.tag_note)));
             noteEditText.setVisibility(View.INVISIBLE);
             noteFinishButton.setVisibility(View.INVISIBLE);
         }
@@ -398,11 +441,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // ------------------------------- utilities ------------------------------- //
+
     private void makeErrorDialogToHome(String msg) {
         new AlertDialog.Builder(this).setMessage(msg).setCancelable(false).setPositiveButton("Go back", new DialogInterface.OnClickListener() {
             public void onClick(final DialogInterface dialog, final int id) {
                 startActivity(new Intent(MapsActivity.this, HomeActivity.class));
                 finish();
             }}).create().show();
+    }
+
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state);
     }
 }
