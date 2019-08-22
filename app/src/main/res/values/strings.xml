@@ -14,4 +14,13 @@
     <string name="tag_camera">camera</string>
     <string name="tag_note">note</string>
     <string name="info_window_description">info window description</string>
+    <string name="register_title">Registration</string>
+    <string name="password_hint">Password</string>
+    <string name="email_hint">Email</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="register_button">Register Here</string>
+    <string name="register_login_link">Have an Account? Login</string>
+    <string name="login_title">Login</string>
+    <string name="login_button">Login</string>
+    <string name="register">Register</string>
 </resources>
