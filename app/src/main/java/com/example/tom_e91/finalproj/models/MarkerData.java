@@ -14,8 +14,9 @@ public class MarkerData {
         return bitmap;
     }
 
-    public void setBitmap(Bitmap bitmap) {
+    public MarkerData setBitmap(Bitmap bitmap) {
         this.bitmap = bitmap;
+        return this;
     }
 
 }

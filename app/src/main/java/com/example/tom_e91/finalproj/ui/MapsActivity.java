@@ -1,6 +1,7 @@
 package com.example.tom_e91.finalproj.ui;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -10,8 +11,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -51,6 +54,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final static int ERROR_DIALOG_REQUEST = 500;
     private static final int INTENT_IMAGE_CAPTURE_CODE = 1000;
     private final static int INTENT_ENABLE_GPS_CODE = 1001;
+    private final static int INTENT_APP_SETTINGS_CODE = 1002;
     // Maps
     GoogleMap mMap;
     // Points
@@ -114,8 +118,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.d(LOG_TAG, "onActivityResult(), ENABLE_GPS_CODE OK");
                     requestLocationPermission();
                 }
-                else
+                else {
+                    makeErrorDialogToHome("Tracking a trip requires Location services");
                     Log.d(LOG_TAG, "onActivityResult(), ENABLE_GPS_CODE failed");
+                }
                 break;
 
             case INTENT_IMAGE_CAPTURE_CODE:
@@ -124,16 +130,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     LatLng latLng = util_func.locToLatLng(mCurrLocation);
                     Bundle extras = data.getExtras();
                     Bitmap imageBitmap = (Bitmap) extras.get("data");
-                    MarkerData tag = new MarkerData(getString(R.string.tag_camera));
-                    tag.setBitmap(imageBitmap);
+                    MarkerData tag = new MarkerData(getString(R.string.tag_camera)).setBitmap(imageBitmap);
                     setMarker(latLng, "Loc", R.drawable.camera_color25, tag);
                 } else {
+                    Toast.makeText(this, "Camera failed", Toast.LENGTH_SHORT).show();
                     Log.d(LOG_TAG, "onActivityResult, IMAGE_CAPTURE failed");
                 }
+
+            case INTENT_APP_SETTINGS_CODE:
+                Log.d(LOG_TAG, String.format("onActivityResult(), APP_SETTINGS, result: %d", resultCode));
+                if (isLocationPermissionGranted()) {
+                        initActivity();
+                } else
+                    makeErrorDialogToHome("Tracking a trip requires Location services.");
         }
     }
 
     // ------------------------------- Permissions ------------------------------- //
+
+    private boolean isLocationPermissionGranted() {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
 
     private boolean checkMapServices() {
         return checkGooglePlayServices() && checkGPSProvider() && requestLocationPermission();
@@ -179,7 +196,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private boolean requestLocationPermission() {
-        boolean locationPermissionGranted = (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
+        boolean locationPermissionGranted = isLocationPermissionGranted();
         Log.d(LOG_TAG, String.format("requestLocationPermission(), location granted %b", locationPermissionGranted));
         if (!locationPermissionGranted) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_LOCATION_CODE);
@@ -187,14 +204,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         else
             return true;
-    }
-
-    private void makeErrorDialogToHome(String msg) {
-        new AlertDialog.Builder(this).setMessage(msg).setCancelable(false).setPositiveButton("I understand", new DialogInterface.OnClickListener() {
-            public void onClick(final DialogInterface dialog, final int id) {
-                startActivity(new Intent(MapsActivity.this, HomeActivity.class));
-                finish();
-            }}).create().show();
     }
 
     @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -211,16 +220,39 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                         else {
                             Log.d(LOG_TAG, "onRequestPermissionsResult(), do not!! ask again");
-                            makeErrorDialogToHome("Tracking a trip requires location permissions\nPlease enable them");
+                            new AlertDialog.Builder(this).setMessage("Tracking a trip requires location permissions").setCancelable(false)
+                                    .setPositiveButton("Go to App settings", new DialogInterface.OnClickListener() {
+                                public void onClick(final DialogInterface dialog, final int id) {
+                                    startInstalledAppDetailsActivity(MapsActivity.this);
+                                }}).setNegativeButton("Go back", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    startActivity(new Intent(MapsActivity.this, HomeActivity.class));
+                                }
+                            }).create().show();
                             return;
                         }
                     }
                 }
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(LOG_TAG, "onRequestPermissionsResult(), initActivity()");
+                if (isLocationPermissionGranted()) {
+                    Log.d(LOG_TAG, "onRequestPermissionsResult(), go to initActivity()");
                     initActivity(); // If all permissions were granted, init activity
                 }
             }
+    }
+
+    public static void startInstalledAppDetailsActivity(final Activity context) {
+        if (context == null) {
+            Log.d(LOG_TAG, "startInstalledAppDetailsActivity() context is null");
+            return;
+        }
+        final Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+//        i.addCategory(Intent.CATEGORY_DEFAULT);
+        i.setData(Uri.parse("package:" + context.getPackageName()));
+//        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+//        i.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        context.startActivityForResult(i, INTENT_APP_SETTINGS_CODE);
     }
 
     // ------------------------------- Map Setup ------------------------------- //
@@ -289,7 +321,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void checkMovement(Location newLocation) {
         LatLng newLatLng = util_func.locToLatLng(newLocation);
-        Log.d(LOG_TAG, String.format("update nadirloc: lat: %f , lng: %f", newLatLng.latitude, newLatLng.longitude));
+        Log.d(LOG_TAG, String.format("update loc: lat: %f , lng: %f", newLatLng.latitude, newLatLng.longitude));
         // First update
         if (mCurrLocation == null) {
             Toast.makeText(this, "first Point!", Toast.LENGTH_SHORT).show();
@@ -363,5 +395,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void getRecommendations() {
         // TODO
+    }
+
+    // ------------------------------- utilities ------------------------------- //
+    private void makeErrorDialogToHome(String msg) {
+        new AlertDialog.Builder(this).setMessage(msg).setCancelable(false).setPositiveButton("Go back", new DialogInterface.OnClickListener() {
+            public void onClick(final DialogInterface dialog, final int id) {
+                startActivity(new Intent(MapsActivity.this, HomeActivity.class));
+                finish();
+            }}).create().show();
     }
 }
