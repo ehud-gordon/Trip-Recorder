@@ -63,6 +63,7 @@ public class Repository {
 
         String uniqueTripName = tripName + Long.toString(System.currentTimeMillis());
         mCurrentTripDocRef =  remoteDB.collection("Users").document(curUser.getEmail()).collection("Trips").document(uniqueTripName);
+        // Add field of Trip name to current trip
         mCurrentTripDocRef.set(new HashMap<String, Object>() {{ put("Trip Name", tripName); }}, SetOptions.merge());
         }
 
@@ -116,10 +117,6 @@ public class Repository {
                 Log.d(LOG_TAG, "addLocation() Old point");
             }
         }
-
-
-
-
     }
 
     public void addMarker(final MyMarker myMarker) {
@@ -138,12 +135,12 @@ public class Repository {
             Map<String, Object> map = new HashMap<>();
             map.put("Markers", Arrays.asList(myMarker));
             mCurrentTripDocRef.set(map, SetOptions.merge());
-
         }
 
         // Else if not first marker update
         else {
             Log.d(LOG_TAG, "addMarker() new marker");
+
             // Updates LiveData
             List<MyMarker> tempMarkers = markersLiveData.getValue();
             tempMarkers.add(myMarker);
