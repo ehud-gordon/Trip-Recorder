@@ -78,6 +78,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Polyline mPolyline;
     private MyLocation mCurrLocation;
     private String mCurrPhotoPath;
+    private Integer noteVisibility = View.GONE;
+    private String NOTE_VISIBILITY_KEY = "NOTE_VISIBILITY_KEY";
 
     // Repository
     Repository repository;
@@ -113,6 +115,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         Log.d(LOG_TAG, "onCreate()");
         repository = ((MyApplication)getApplicationContext()).getRepository();
+        if (savedInstanceState != null) {
+            noteVisibility = savedInstanceState.getInt(NOTE_VISIBILITY_KEY);
+        }
         bindViews();
 
         // Check required Location permission
@@ -127,13 +132,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(NOTE_VISIBILITY_KEY, noteVisibility);
+    }
+
     private void bindViews() {
         // Hide title bar
         getSupportActionBar().hide();
         setContentView(R.layout.activity_maps);
         noteEditText = findViewById(R.id.note_edit_text);
+        noteEditText.setVisibility(noteVisibility);
         noteFinishButton = findViewById(R.id.note_finish_button);
         noteFinishButton.setOnClickListener(this);
+        noteFinishButton.setVisibility(noteVisibility);
         findViewById(R.id.map_stop_button).setOnClickListener(this);
         findViewById(R.id.map_star).setOnClickListener(this);
         findViewById(R.id.map_camera).setOnClickListener(this);
@@ -338,6 +351,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.map_note:
                 noteEditText.setVisibility(View.VISIBLE);
                 noteFinishButton.setVisibility(View.VISIBLE);
+                noteVisibility = View.VISIBLE;
                 break;
 
             case R.id.note_finish_button:
@@ -359,6 +373,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             noteEditText.setVisibility(View.INVISIBLE);
             noteFinishButton.setVisibility(View.INVISIBLE);
+            noteVisibility = View.GONE;
             MyMarker myMarker = new MyMarker(Constants.note, mCurrLocation).setNoteContent(content);
             addMarkerToDbAndMap(myMarker);
         }

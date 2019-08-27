@@ -68,9 +68,14 @@ public class Repository {
     /**
      * Creates new Trip Document in remoteDB and sets mCurrentTripDocRef
      */
-    public void createNewTrip(String tripName) {
+    public void createNewTrip(final String tripName) {
+        // Create Trip Document
+
         String uniqueTripName = tripName + Long.toString(System.currentTimeMillis());
         mCurrentTripDocRef =  remoteDB.collection("Users").document(curUser.getEmail()).collection("Trips").document(uniqueTripName);
+        mCurrentTripDocRef.set(new HashMap<String, Object>() {{ put("Trip Name", tripName); }}, SetOptions.merge());
+
+        // Create Marker Collection in Trip Document
         mCurrentMarkerCollectionRef = mCurrentTripDocRef.collection("Markers");
     }
 
