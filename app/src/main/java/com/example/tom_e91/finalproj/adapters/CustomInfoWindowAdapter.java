@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -11,10 +12,12 @@ import android.widget.TextView;
 
 import com.example.tom_e91.finalproj.R;
 import com.example.tom_e91.finalproj.models.MarkerTag;
+import com.example.tom_e91.finalproj.util.Constants;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 
 public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
+    private final static String LOG_TAG = "nadir" + CustomInfoWindowAdapter.class.getSimpleName();
 
     private Context mContext;
 
@@ -23,45 +26,61 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     }
 
 
-    @Override
-    public View getInfoWindow(Marker marker) {
+    /**
+     * @param marker:  The marker whose Info Window we want to set
+     * @return View: Based on marker type (tag), return appropriate View for marker's Info Window
+     */
+    @Override public View getInfoWindow(Marker marker) {
+        View layout;
         MarkerTag markerTag = (MarkerTag) marker.getTag();
-        String tag = markerTag.tag;
-
-        if (tag.equals(mContext.getString(R.string.tag_note))) {
-            View layout = LayoutInflater.from(mContext).inflate(R.layout.costum_info_window_note, null);
-            String title = marker.getTitle();
-            TextView tvTitle = (TextView) layout.findViewById(R.id.title);
-
-            if (!title.equals("")) {
-                tvTitle.setText(title);
-            }
-
-            String snippet = marker.getTitle();
-            TextView tvSnippet = (TextView) layout.findViewById(R.id.snippet);
-
-            if (!snippet.equals("")) {
-                tvSnippet.setText(snippet);
-            }
-            return layout;
-        }
-
-        else if (tag.equals(mContext.getString(R.string.tag_camera))) {
-            View layout = LayoutInflater.from(mContext).inflate(R.layout.custom_info_window_camera, null);
-            ImageView imageView = layout.findViewById(R.id.info_window_image);
-
-            // Set bitmap image
-            Bitmap imageBitmap = markerTag.getBitmap();
-            imageView.setImageBitmap(imageBitmap);
-            return layout;
-        }
-
-        else
+        if (markerTag == null) {
+            Log.d(LOG_TAG, "getInfoWindow(), markerTag is null");
             return null;
+        }
+
+
+        switch (markerTag.tag) {
+
+            case Constants.note:
+                layout = LayoutInflater.from(mContext).inflate(R.layout.costum_info_window_note, null);
+
+                // Set Title
+                String markerTitle = marker.getTitle();
+                TextView tvTitle = (TextView) layout.findViewById(R.id.title);
+                if (!markerTitle.equals("")) {
+                    tvTitle.setText(markerTitle);
+                }
+
+                // Set Snippet
+                String noteContent = markerTag.getNoteContent();
+                TextView tvSnippet = (TextView) layout.findViewById(R.id.snippet);
+                if (!noteContent.equals("")) {
+                    tvSnippet.setText(noteContent);
+                }
+
+                return layout;
+
+            case Constants.camera:
+                layout = LayoutInflater.from(mContext).inflate(R.layout.custom_info_window_camera, null);
+
+                // Set Image
+                ImageView imageView = layout.findViewById(R.id.info_window_image);
+
+                // Set bitmap image
+                Bitmap imageBitmap = markerTag.getBitmap();
+                imageView.setImageBitmap(imageBitmap);
+
+                return layout;
+
+            case Constants.marker:
+                return null;
+
+            default:
+                return null;
+        }
     }
 
-    @Override
-    public View getInfoContents(Marker marker) {
+    @Override public View getInfoContents(Marker marker) {
         return null;
     }
 

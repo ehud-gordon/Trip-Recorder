@@ -1,7 +1,45 @@
 <resources>
-    <string name="google_maps_api_key">AIzaSyCAa3d-dLSQdVf2RVchEWzJSjpp5kcSnl0</string>
-    <string name="app_name">finalProj</string>
+    <string name="app_name">Tripcorder</string>
+
+
+    <!-- Strings related to login -->
+    <string name="register_title">Registration</string>
+    <string name="password_hint">Password</string>
+    <string name="email_hint">Email</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="register_button">Register</string>
+    <string name="register_login_link">Have an Account? Login</string>
+    <string name="login_title">Login</string>
+    <string name="login_button">Login</string>
+    <string name="register">Don\'t have an account? Register</string>
     <string name="action_sign_out">Sign out</string>
+
+    <!--Firebase EmailPasswordActivity-->
+    <string name="auth_failed">Authentication failed</string>
+    <string name="loading">Loading…</string>
+    <string name="sign_in">Sign In</string>
+    <string name="signed_in">Signed In</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="signed_out">Please sign-in or create account</string>
+
+    <string name="emailpassword_title_text">Email and Password</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="create_account">Create Account</string>
+    <string name="verify_email">Verify Email</string>
+
+
+
+
+    <!--Formats -->
+    <string name="firebase_status_fmt">Firebase User: %s</string>
+    <string name="emailpassword_status_fmt">Email User: %1$s (verified: %2$b)</string>
+    <string name="passwordless_status_fmt">Email User: %1$s (verified: %2$b)</string>
+    <string name="id_fmt">User ID: %s</string>
+
+
+    <!-- Strings related to Maps -->
+    <string name="google_maps_api_key">AIzaSyCAa3d-dLSQdVf2RVchEWzJSjpp5kcSnl0</string>
     <string name="collection_users">Users</string>
     <string name="default_info_title">Default Location</string>
     <string name="default_info_snippet">No places found, because location permission is disabled.</string>
@@ -11,16 +49,12 @@
     <string name="note_icon">note icon</string>
     <string name="camera_icon">camera icon</string>
     <string name="star_icon">star icon</string>
-    <string name="tag_camera">camera</string>
-    <string name="tag_note">note</string>
     <string name="info_window_description">info window description</string>
-    <string name="register_title">Registration</string>
-    <string name="password_hint">Password</string>
-    <string name="email_hint">Email</string>
-    <string name="confirm_password_hint">Confirm Password</string>
-    <string name="register_button">Register Here</string>
-    <string name="register_login_link">Have an Account? Login</string>
-    <string name="login_title">Login</string>
-    <string name="login_button">Login</string>
-    <string name="register">Register</string>
+
+    <!--Service-->
+    <string name="location_updated">Location Updated: %1$s</string>
+    <string name="launch_activity">Launch activity</string>
+    <string name="failed_to_create">failed to create new account</string>
+
+
 </resources>

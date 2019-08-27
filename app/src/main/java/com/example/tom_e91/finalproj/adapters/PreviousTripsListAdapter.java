@@ -31,8 +31,8 @@ public class PreviousTripsListAdapter extends RecyclerView.Adapter<PreviousTrips
 
     @Override public void onBindViewHolder(@NonNull PreviousTripsListAdapter.TripViewHolder holder, int position) {
         Trip currentTrip = tripList.get(position);
-        String currentTitle = currentTrip.getTrip_title();
-        holder.tripItemView.setText(currentTitle);
+//        String currentTitle = currentTrip.getTrip_title();
+//        holder.tripItemView.setText(currentTitle);
     }
 
     @Override public int getItemCount() {

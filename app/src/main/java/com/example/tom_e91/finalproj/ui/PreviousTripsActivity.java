@@ -21,7 +21,7 @@ public class PreviousTripsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_previous_trips);
 
         // Create initial trips
-        for (int i = 0; i < 10; ++i) { tripList.addLast(new Trip(i, Integer.toString(i))); }
+//        for (int i = 0; i < 10; ++i) { tripList.addLast(new Trip(i, Integer.toString(i))); }
 
         // Set up RecyclerView
         RecyclerView previousTripsRecyclerView = findViewById(R.id.previous_trips_rv);

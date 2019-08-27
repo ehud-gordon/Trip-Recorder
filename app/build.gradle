@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.example.tom_e91.finalproj"
@@ -24,20 +25,28 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.android.support:design:27.1.1'
-    // nicer design
     // Recyclerview
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     // Supports Gson
     implementation 'com.google.code.gson:gson:2.8.5'
-    // Supports DB.
+
+    // Firebase DB
     implementation 'com.google.firebase:firebase-firestore:18.2.0'
     implementation 'com.google.firebase:firebase-core:16.0.8'
+    // Firebase Authentication
     implementation 'com.google.firebase:firebase-auth:17.0.0'
-    //Google Play Services for Maps
+//    implementation 'com.firebaseui:firebase-ui-auth:4.3.1'
+
+    //Google Play Services APIs
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
-    // Google play services for location information
     implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation 'com.google.android.gms:play-services-places:15.0.1'
+
+    // Lifecycle
+    implementation 'android.arch.lifecycle:extensions:1.1.1'
+    implementation 'android.arch.lifecycle:livedata:1.1.1'
+    implementation 'android.arch.lifecycle:viewmodel:1.1.1'
+    annotationProcessor 'android.arch.lifecycle:compiler:1.1.1'
 }
 
 

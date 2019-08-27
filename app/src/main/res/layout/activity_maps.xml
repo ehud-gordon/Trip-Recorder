@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:weightSum="100" >
+    android:weightSum="100">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
@@ -37,6 +36,7 @@
                 android:id="@+id/map_marker"
                 android:layout_width="35dp"
                 android:layout_height="36dp"
+                android:contentDescription="marker icon"
                 app:srcCompat="@mipmap/marker_foreground" />
 
             <ImageView
@@ -57,6 +57,7 @@
                 android:id="@+id/map_star"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:contentDescription="star icon"
                 app:srcCompat="@android:drawable/btn_star_big_on" />
 
         </LinearLayout>
@@ -89,7 +90,6 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:elevation="2dp"
-            android:onClick="finishButtonOnClick"
             android:text="Finish"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@+id/map"

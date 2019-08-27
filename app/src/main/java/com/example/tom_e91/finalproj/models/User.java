@@ -1,17 +1,18 @@
 package com.example.tom_e91.finalproj.models;
 
+import android.support.annotation.NonNull;
+
 public class User {
-    private String email, user_id, username;
+    private String email;
 
     // ----------------------------- Constructors ---------------------- //
     User() {}
-    public User(String email, String user_id, String username) {
+
+    public User(String email) {
         this.email = email;
-        this.user_id = user_id;
-        this.username = username;
     }
 
-    // --------------------------- Getters & Setters -------------------------//
+    // --------------------------- Getters & Setters ------------------------- //
 
     public String getEmail() {
         return email;
@@ -21,19 +22,9 @@ public class User {
         this.email = email;
     }
 
-    public String getUser_id() {
-        return user_id;
-    }
+    // --------------------------- Util ------------------------- //
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+    private static String getUsernameFromEmail(@NonNull final String email) {
+        return email.substring(0, email.indexOf("@"));
     }
 }

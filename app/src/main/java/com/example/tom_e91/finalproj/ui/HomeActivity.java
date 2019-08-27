@@ -3,21 +3,22 @@ package com.example.tom_e91.finalproj.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.example.tom_e91.finalproj.MyApplication;
 import com.example.tom_e91.finalproj.R;
-import com.example.tom_e91.finalproj.models.User;
+import com.example.tom_e91.finalproj.models.Repository;
+import com.example.tom_e91.finalproj.util.util_func;
 import com.google.firebase.auth.FirebaseAuth;
 
 
 public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
 
     // Constants
-    private static final String LOG_TAG = "nadir " + RegisterActivity.class.getSimpleName();
+    private static final String LOG_TAG = "nadir " + HomeActivity.class.getSimpleName();
+    Repository repository;
 
     // ------------------------------- LifeCycle ------------------------------- //
 
@@ -29,9 +30,11 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.record_button).setOnClickListener(this);
         findViewById(R.id.view_previous_trips_button).setOnClickListener(this);
 
-        // Example Usage of MyApplication
-        User curUser = ((MyApplication) getApplicationContext()).getUser();
-        Log.d(LOG_TAG, String.format("User email is: %s", curUser.getEmail()));
+        // TODO weird
+        util_func.setRequestingLocationUpdates(this,false);
+
+        // Set up repository
+        repository = ((MyApplication)getApplicationContext()).getRepository();
     }
 
     @Override
@@ -42,6 +45,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.record_button:
+                // Create new trip in DB
+                repository.createNewTrip();
+
+                // Go to MapsActivity
                 startActivity(new Intent(this, MapsActivity.class));
                 break;
         }
@@ -69,7 +76,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private void signOut() {
         // TODO check if need to update user in MyApplication
         FirebaseAuth.getInstance().signOut();
-        Intent intent = new Intent(this, LoginActivity.class);
+        Intent intent = new Intent(this, EmailPasswordActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
