@@ -5,7 +5,6 @@ import android.location.Location;
 import android.util.Log;
 
 import com.example.tom_e91.finalproj.util.util_func;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -36,7 +35,6 @@ public class Repository {
     // User Data
     private User curUser;
     private DocumentReference mCurrentTripDocRef; // The Document that'll be updated in the remoteDB for this trip
-    private CollectionReference mCurrentMarkerCollectionRef; // The Marker Collection that'll be updated in the remoteDB for this trip
 
     // ------------------------------- Constructors ------------------------------- //
 
@@ -66,10 +64,7 @@ public class Repository {
         String uniqueTripName = tripName + Long.toString(System.currentTimeMillis());
         mCurrentTripDocRef =  remoteDB.collection("Users").document(curUser.getEmail()).collection("Trips").document(uniqueTripName);
         mCurrentTripDocRef.set(new HashMap<String, Object>() {{ put("Trip Name", tripName); }}, SetOptions.merge());
-
-        // Create Marker Collection in Trip Document
-//        mCurrentMarkerCollectionRef = mCurrentTripDocRef.collection("Markers");
-    }
+        }
 
     // ------------------------------- DB Operations ------------------------------- //
 
