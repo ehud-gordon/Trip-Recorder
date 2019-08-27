@@ -67,25 +67,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // Constants
     private static final String LOG_TAG = "nadir " + MapsActivity.class.getSimpleName();
-
-    // Maps
-    private GoogleMap mMap;
-    private OnLocationChangedListener mLocationChangedListener;
-
     // Views
     EditText noteEditText;
     Button noteFinishButton;
-
+    // Repository
+    Repository repository;
+    // Maps
+    private GoogleMap mMap;
+    private OnLocationChangedListener mLocationChangedListener;
     // Trip
     private Polyline mPolyline;
     private MyLocation mCurrLocation;
     private String mCurrPhotoPath;
     private Integer noteVisibility = View.GONE;
     private String NOTE_VISIBILITY_KEY = "NOTE_VISIBILITY_KEY";
-
-    // Repository
-    Repository repository;
-
+    private boolean drawAllMarkers = true;
     // --------------------------------- Service --------------------------------- //
     // The BroadcastReceiver used to listen to broadcasts from the service.
     private MyReceiver myReceiver;
@@ -113,10 +109,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // ------------------------------- LifeCycle ------------------------------- //
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    public static void startInstalledAppDetailsActivity(final Activity context) {
+        if (context == null) {
+            Log.d(LOG_TAG, "startInstalledAppDetailsActivity() context is null");
+            return;
+        }
+        final Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        i.setData(Uri.parse("package:" + context.getPackageName()));
+        context.startActivityForResult(i, Constants.INTENT_APP_SETTINGS_CODE);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(LOG_TAG, "onCreate()");
-        repository = ((MyApplication)getApplicationContext()).getRepository();
+        repository = ((MyApplication) getApplicationContext()).getRepository();
         if (savedInstanceState != null) {
             noteVisibility = savedInstanceState.getInt(NOTE_VISIBILITY_KEY);
         }
@@ -156,24 +163,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         findViewById(R.id.map_note).setOnClickListener(this);
     }
 
-    @Override protected void onStart() {
+    @Override
+    protected void onStart() {
         super.onStart();
         // Bind to the service. If the service is in foreground mode, this signals to the service
         // that since this activity is in the foreground, the service can exit foreground mode.
         bindService(new Intent(this, LocationUpdatesService.class), mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    @Override protected void onResume() {
+    @Override
+    protected void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver, new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
     }
 
-    @Override protected void onPause() {
+    @Override
+    protected void onPause() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(myReceiver);
         super.onPause();
     }
 
-    @Override protected void onStop() {
+    @Override
+    protected void onStop() {
         if (mBound) {
             // Unbind from the service. This signals to the service that this activity is no longer
             // in the foreground, and the service can respond by promoting itself to a foreground service.
@@ -210,8 +221,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         repository.currLocation.observe(this, new Observer<Location>() {
             @Override
             public void onChanged(@Nullable Location location) {
-                mCurrLocation = new MyLocation(location);
-                mLocationChangedListener.onLocationChanged(location);
+                if (location != null) {
+                    mCurrLocation = new MyLocation(location);
+                    mLocationChangedListener.onLocationChanged(location);
+                }
             }
         });
 
@@ -219,9 +232,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onChanged(@Nullable List<MyMarker> myMarkers) {
                 if (myMarkers != null && myMarkers.size() > 0) {
-                    Log.d(LOG_TAG,"markersLiveData observe update");
-                    for (MyMarker myMarker : myMarkers) {
-                        addMarkerToMap(myMarker);
+                    Log.d(LOG_TAG, "markersLiveData observe update");
+                    if (drawAllMarkers) { // Update caused by first call of onCreate
+                        Log.d(LOG_TAG, "markersLiveData drawAllMarkers");
+                        for (MyMarker myMarker : myMarkers) {
+                            addMarkerToMap(myMarker);
+                            drawAllMarkers = false;
+                        }
+                    } else { // This update was caused by marker drawn
+                        Log.d(LOG_TAG, "markersLiveData draw only last markers");
+                        addMarkerToMap(myMarkers.get(myMarkers.size() - 1));
                     }
                 } else {
                     Log.d(LOG_TAG, "markersLiveData observe size 0!");
@@ -229,12 +249,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        repository.getMarkers();
-
 
     }
 
-    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // ------------------------------- Map Setup ------------------------------- //
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
 
             case Constants.INTENT_ENABLE_GPS_CODE:
@@ -257,7 +278,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     // Create marker with the resulting bitmap image
                     MyMarker myMarker = new MyMarker(Constants.camera, mCurrLocation).setBitmap(imageBitmap);
-                    addMarkerToDbAndMap(myMarker);
+                    addMarkerToDb(myMarker);
                 } else {
                     Toast.makeText(this, "No image was captured", Toast.LENGTH_SHORT).show();
                     Log.d(LOG_TAG, "onActivityResult(), RESULT failed");
@@ -270,8 +291,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 } else makeErrorDialogToHome("Tracking a trip requires Location services.");
         }
     }
-
-    // ------------------------------- Map Setup ------------------------------- //
 
     @SuppressWarnings("MissingPermission")
     @Override
@@ -298,9 +317,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    public void addMarkerToDbAndMap(MyMarker myMarker) {
+    public void addMarkerToDb(MyMarker myMarker) {
         repository.addMarker(myMarker);
-        addMarkerToMap(myMarker);
     }
 
     public void addMarkerToMap(MyMarker marker) {
@@ -331,14 +349,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return polyline;
     }
 
+    // ------------------------------- Sidebar ------------------------------- //
+
     private void updateCamera(MyLocation myLocation) {
         LatLng currLatLng = myLocation.toLatLng();
         mMap.moveCamera(CameraUpdateFactory.newLatLng(currLatLng));
     }
 
-    // ------------------------------- Sidebar ------------------------------- //
-
-    @Override public void onClick(View view) {
+    @Override
+    public void onClick(View view) {
         switch (view.getId()) {
 
             case R.id.map_stop_button:
@@ -367,7 +386,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             case R.id.map_marker:
                 MyMarker myMarker = new MyMarker(Constants.marker, mCurrLocation);
-                addMarkerToDbAndMap(myMarker);
+                addMarkerToDb(myMarker);
                 break;
 
         }
@@ -382,7 +401,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             noteFinishButton.setVisibility(View.INVISIBLE);
             noteVisibility = View.GONE;
             MyMarker myMarker = new MyMarker(Constants.note, mCurrLocation).setNoteContent(content);
-            addMarkerToDbAndMap(myMarker);
+            addMarkerToDb(myMarker);
         }
     }
 
@@ -414,11 +433,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    // ------------------------------- utilities ------------------------------- //
+
     private void getRecommendations() {
         // TODO
     }
-
-    // ------------------------------- utilities ------------------------------- //
 
     private File createImageFile() throws IOException {
         // Create an image file name
@@ -439,20 +458,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }).create().show();
     }
 
-    public static void startInstalledAppDetailsActivity(final Activity context) {
-        if (context == null) {
-            Log.d(LOG_TAG, "startInstalledAppDetailsActivity() context is null");
-            return;
-        }
-        final Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        i.setData(Uri.parse("package:" + context.getPackageName()));
-        context.startActivityForResult(i, Constants.INTENT_APP_SETTINGS_CODE);
-    }
-
     // ------------------------------- Permissions ------------------------------- //
     private boolean checkMapServices() {
         return checkGooglePlayServices() && checkGPSProvider() && requestLocationPermission();
     }
+
     private boolean checkGooglePlayServices() {
         int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
 
@@ -468,6 +478,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         return false;
     }
+
     private boolean checkGPSProvider() {
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (manager == null) {
@@ -490,6 +501,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         }
     }
+
     private boolean requestLocationPermission() {
         boolean locationPermissionGranted = isLocationPermissionGranted();
 //        Log.d(LOG_TAG, String.format("requestLocationPermission(), location granted %b", locationPermissionGranted));
@@ -498,7 +510,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return false;
         } else return true;
     }
-    @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case Constants.PERMISSION_LOCATION_CODE:
@@ -531,6 +545,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
         }
     }
+
     private boolean isLocationPermissionGranted() {
         return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
@@ -538,11 +553,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // ------------------------------- Location Source ------------------------------- //
 
 
-    @Override public void activate(OnLocationChangedListener onLocationChangedListener) {
+    @Override
+    public void activate(OnLocationChangedListener onLocationChangedListener) {
         mLocationChangedListener = onLocationChangedListener;
     }
 
-    @Override public void deactivate() {
+    @Override
+    public void deactivate() {
         mLocationChangedListener = null;
     }
 
@@ -553,8 +570,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public void onReceive(Context context, Intent intent) {
             Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
-            if (location != null)
-                Log.d(LOG_TAG, "Receiver Update " + location);
+            if (location != null) Log.d(LOG_TAG, "Receiver Update " + location);
         }
     }
 }
