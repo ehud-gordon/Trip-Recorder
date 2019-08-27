@@ -38,7 +38,7 @@ public class Repository {
 
     // Location Data
     public MutableLiveData<List<MyLocation>> locations = new MutableLiveData<>();
-    public MutableLiveData<MyLocation> currLocation = new MutableLiveData<>();
+    public MutableLiveData<Location> currLocation = new MutableLiveData<>();
     public MutableLiveData<List<MyMarker>> markersLiveData = new MutableLiveData<>();
 
     // User Data
@@ -80,8 +80,6 @@ public class Repository {
     }
 
     // ------------------------------- DB Operations ------------------------------- //
-
-    // Locations //
 
     /**
      *  A call to the remoteDB to get all current trip locations
@@ -133,7 +131,8 @@ public class Repository {
         // Else if not first Location update
         else {
             // Update Locations only if moved from previous location
-            if (util_func.isNewLocation(currLocation.getValue(),newMyLocation)) {
+            MyLocation currMyLocation = new MyLocation(currLocation.getValue());
+            if (util_func.isNewLocation(currMyLocation, newMyLocation)) {
                 Log.d(LOG_TAG, "addLocation() new Point");
 
                 // Updates LiveData
@@ -149,7 +148,7 @@ public class Repository {
         }
 
         // Update last current location, must come at end of function
-        currLocation.setValue(newMyLocation);
+        currLocation.setValue(newLocation);
 
 
     }

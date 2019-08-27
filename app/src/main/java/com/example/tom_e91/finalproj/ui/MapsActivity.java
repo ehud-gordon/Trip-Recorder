@@ -47,6 +47,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -62,13 +63,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener, LocationSource {
 
     // Constants
     private static final String LOG_TAG = "nadir " + MapsActivity.class.getSimpleName();
 
     // Maps
     private GoogleMap mMap;
+    private OnLocationChangedListener mLocationChangedListener;
 
     // Views
     EditText noteEditText;
@@ -178,6 +180,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             unbindService(mServiceConnection);
             mBound = false;
         }
+        mMap.setLocationSource(null);
         super.onStop();
     }
 
@@ -204,10 +207,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         // Current Location Observer
-        repository.currLocation.observe(this, new Observer<MyLocation>() {
+        repository.currLocation.observe(this, new Observer<Location>() {
             @Override
-            public void onChanged(@Nullable MyLocation myLocation) {
-                mCurrLocation = myLocation;
+            public void onChanged(@Nullable Location location) {
+                mCurrLocation = new MyLocation(location);
+                mLocationChangedListener.onLocationChanged(location);
             }
         });
 
@@ -283,6 +287,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
+        mMap.setLocationSource(this);
+        mMap.setMyLocationEnabled(true);
+
         mPolyline = initPolyline();
 
         // Start Observing for changes
@@ -526,6 +533,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
     private boolean isLocationPermissionGranted() {
         return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    // ------------------------------- Location Source ------------------------------- //
+
+
+    @Override public void activate(OnLocationChangedListener onLocationChangedListener) {
+        mLocationChangedListener = onLocationChangedListener;
+    }
+
+    @Override public void deactivate() {
+        mLocationChangedListener = null;
     }
 
     // ------------------------------- Service ------------------------------- //
