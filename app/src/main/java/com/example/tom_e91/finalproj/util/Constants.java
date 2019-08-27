@@ -3,6 +3,9 @@ package com.example.tom_e91.finalproj.util;
 import com.google.android.gms.maps.model.LatLng;
 
 public class Constants {
+    // Bundle
+    public static final String TRIP_NAME_KEY = "TRIP_NAME";
+
     // Permissions
     public static final int PERMISSION_LOCATION_CODE = 1;
 
@@ -20,7 +23,7 @@ public class Constants {
     public static final LatLng p3 = new LatLng(37.4226, -122.084);
     public static final LatLng p4 = new LatLng(37.4229, -122.084);
 
-    public static final LatLng DEFAULT_LOCATION = p1; // A default location
+    public static final LatLng DEFAULT_LAT_LNG = p1; // A default location
     public static final int DEFAULT_ZOOM = 18;
 
     // Colors

@@ -37,7 +37,8 @@ import android.widget.Toast;
 import com.example.tom_e91.finalproj.MyApplication;
 import com.example.tom_e91.finalproj.R;
 import com.example.tom_e91.finalproj.adapters.CustomInfoWindowAdapter;
-import com.example.tom_e91.finalproj.models.MarkerTag;
+import com.example.tom_e91.finalproj.models.MyLocation;
+import com.example.tom_e91.finalproj.models.MyMarker;
 import com.example.tom_e91.finalproj.models.Repository;
 import com.example.tom_e91.finalproj.services.LocationUpdatesService;
 import com.example.tom_e91.finalproj.util.Constants;
@@ -75,13 +76,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // Trip
     private Polyline mPolyline;
-    private Location mCurrLocation;
+    private MyLocation mCurrLocation;
     private String mCurrPhotoPath;
 
     // Repository
     Repository repository;
 
-//     --------------------------------- Service --------------------------------- //
+    // --------------------------------- Service --------------------------------- //
     // The BroadcastReceiver used to listen to broadcasts from the service.
     private MyReceiver myReceiver;
     // A reference to the service used to get location updates.
@@ -176,44 +177,44 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void setupObservers() {
-        repository.locations.observe(this, new Observer<List<Location>>() {
+
+        repository.locations.observe(this, new Observer<List<MyLocation>>() {
             @Override
-            public void onChanged(@Nullable List<Location> locations) {
-                if (locations != null && locations.size() > 0) {
+            public void onChanged(@Nullable List<MyLocation> myLocations) {
+                if (myLocations != null && myLocations.size() > 0) {
                     Log.d(LOG_TAG, "locations from DB larger than 0");
-                    mCurrLocation = locations.get(locations.size()-1);
-                    List<LatLng> latLngList = util_func.locationsToLatLngs(locations);
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(util_func.locationToLatLng(mCurrLocation)));
+                    List<LatLng> latLngList = util_func.myLocationsToLatLngs(myLocations);
+                    updateCamera(myLocations.get(myLocations.size() - 1));
                     mPolyline.setPoints(latLngList);
-                } else
-                    Log.d(LOG_TAG, "locations from DB is size 0");
+                } else Log.d(LOG_TAG, "locations from DB is size 0");
             }
         });
 
         // Current Location Observer
-        repository.currLocation.observe(this, new Observer<Location>() {
+        repository.currLocation.observe(this, new Observer<MyLocation>() {
             @Override
-            public void onChanged(@Nullable Location location) {
-                mCurrLocation = location;
+            public void onChanged(@Nullable MyLocation myLocation) {
+                mCurrLocation = myLocation;
             }
         });
 
-        repository.getMarkers();
-
-
-        repository.markersLiveData.observe(this, new Observer<List<MarkerTag>>() {
+        repository.markersLiveData.observe(this, new Observer<List<MyMarker>>() {
             @Override
-            public void onChanged(@Nullable List<MarkerTag> markerTags) {
-                if (markerTags!= null && markerTags.size() > 0) {
+            public void onChanged(@Nullable List<MyMarker> myMarkers) {
+                if (myMarkers != null && myMarkers.size() > 0) {
                     Log.d(LOG_TAG,"markersLiveData observe update");
-                    for (MarkerTag markerTag : markerTags) {
-                        addMarkerToMap(markerTag);
+                    for (MyMarker myMarker : myMarkers) {
+                        addMarkerToMap(myMarker);
                     }
                 } else {
                     Log.d(LOG_TAG, "markersLiveData observe size 0!");
                 }
             }
         });
+
+        repository.getMarkers();
+
+
     }
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -232,11 +233,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case Constants.INTENT_IMAGE_CAPTURE_CODE:
                 if (resultCode == RESULT_OK) {
                     Log.d(LOG_TAG, "onActivityResult(), RESULT_OK");
-                    // Create marker with the resulting bitmap image
+
+                    // Get Bitmap
                     Bundle extras = data.getExtras();
                     Bitmap imageBitmap = (Bitmap) extras.get("data");
-                    MarkerTag markerTag = new MarkerTag(Constants.camera, mCurrLocation).setBitmap(imageBitmap);
-                    addMarkerToDbAndMap(markerTag);
+
+                    // Create marker with the resulting bitmap image
+                    MyMarker myMarker = new MyMarker(Constants.camera, mCurrLocation).setBitmap(imageBitmap);
+                    addMarkerToDbAndMap(myMarker);
                 } else {
                     Toast.makeText(this, "No image was captured", Toast.LENGTH_SHORT).show();
                     Log.d(LOG_TAG, "onActivityResult(), RESULT failed");
@@ -262,7 +266,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         // Init Map
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Constants.DEFAULT_LOCATION, Constants.DEFAULT_ZOOM));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Constants.DEFAULT_LAT_LNG, Constants.DEFAULT_ZOOM));
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
@@ -274,24 +278,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    public void addMarkerToDbAndMap(MarkerTag markerTag) {
-        repository.addMarker(markerTag);
-        addMarkerToMap(markerTag);
+    public void addMarkerToDbAndMap(MyMarker myMarker) {
+        repository.addMarker(myMarker);
+        addMarkerToMap(myMarker);
     }
 
-    public void addMarkerToMap(MarkerTag marker) {
-        Log.d(LOG_TAG, "addMarkerToMap() for " + marker.position);
+    public void addMarkerToMap(MyMarker marker) {
+        Log.d(LOG_TAG, "addMarkerToMap() for " + marker.location);
+        LatLng markerLatLng = marker.location.toLatLng();
         switch (marker.tag) {
             case Constants.marker:
-                mMap.addMarker(new MarkerOptions().position(marker.position)).setTag(marker);
+                mMap.addMarker(new MarkerOptions().position(markerLatLng)).setTag(marker);
                 break;
 
             case Constants.camera:
-                mMap.addMarker(new MarkerOptions().position(marker.position).icon(BitmapDescriptorFactory.fromResource(R.drawable.camera_color25))).setTag(marker);
+                mMap.addMarker(new MarkerOptions().position(markerLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.camera_color25))).setTag(marker);
                 break;
 
             case Constants.note:
-                mMap.addMarker(new MarkerOptions().position(marker.position).icon(BitmapDescriptorFactory.fromResource(R.drawable.note20))).setTag(marker);
+                mMap.addMarker(new MarkerOptions().position(markerLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.note20))).setTag(marker);
                 break;
 
             case Constants.star:
@@ -304,6 +309,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         polyline.setColor(Constants.COLOR_GREEN_ARGB);
         polyline.setEndCap(new CustomCap(BitmapDescriptorFactory.fromResource(R.drawable.ic_arrow), 30));
         return polyline;
+    }
+
+    private void updateCamera(MyLocation myLocation) {
+        LatLng currLatLng = myLocation.toLatLng();
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(currLatLng));
     }
 
     // ------------------------------- Sidebar ------------------------------- //
@@ -335,8 +345,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
 
             case R.id.map_marker:
-                MarkerTag markerTag = new MarkerTag(Constants.marker, mCurrLocation);
-                addMarkerToDbAndMap(markerTag);
+                MyMarker myMarker = new MyMarker(Constants.marker, mCurrLocation);
+                addMarkerToDbAndMap(myMarker);
                 break;
 
         }
@@ -349,8 +359,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             noteEditText.setVisibility(View.INVISIBLE);
             noteFinishButton.setVisibility(View.INVISIBLE);
-            MarkerTag markerTag = new MarkerTag(Constants.note, mCurrLocation).setNoteContent(content);
-            addMarkerToDbAndMap(markerTag);
+            MyMarker myMarker = new MyMarker(Constants.note, mCurrLocation).setNoteContent(content);
+            addMarkerToDbAndMap(myMarker);
         }
     }
 
@@ -510,8 +520,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public void onReceive(Context context, Intent intent) {
             Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
-//            if (location != null)
-//                Log.d(LOG_TAG, "Receiver Update " + location);
+            if (location != null)
+                Log.d(LOG_TAG, "Receiver Update " + location);
         }
     }
 }

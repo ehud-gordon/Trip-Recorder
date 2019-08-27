@@ -1,20 +1,11 @@
 package com.example.tom_e91.finalproj.models;
 
 import android.graphics.Bitmap;
-import android.location.Location;
 import android.support.annotation.NonNull;
 
-import com.example.tom_e91.finalproj.util.util_func;
-import com.google.android.gms.maps.model.LatLng;
-
-import java.util.Date;
-
-public class MarkerTag {
+public class MyMarker {
     public String tag;
-    public Location location;
-
-    public LatLng position;
-    public Date date;
+    public MyLocation location;
 
     // In case this is a camera-marker
     public Bitmap bitmap;
@@ -25,47 +16,48 @@ public class MarkerTag {
 
     // ------------------------------- Constructors ------------------------------- //
 
-    public MarkerTag() {}
+    public MyMarker() {}
 
-    public MarkerTag(@NonNull String tag, Location location) {
+    public MyMarker(@NonNull String tag, MyLocation location) {
         this.tag = tag;
         this.location = location;
-        position = util_func.locationToLatLng(location);
-        date = new Date(location.getTime());
     }
 
     // ------------------------------- Getters & Setters ------------------------------- //
+
 
     public String getTag() {
         return tag;
     }
 
-    public Location getLocation() {
+    public MyMarker setTag(String tag) {
+        this.tag = tag;
+        return this;
+    }
+
+    public MyLocation getLocation() {
         return location;
     }
 
-    public LatLng getPosition() {
-        return position;
-    }
-
-    public Date getDate() {
-        return date;
+    public MyMarker setLocation(MyLocation location) {
+        this.location = location;
+        return this;
     }
 
     public Bitmap getBitmap() {
         return bitmap;
     }
 
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public MarkerTag setBitmap(Bitmap bitmap) {
+    public MyMarker setBitmap(Bitmap bitmap) {
         this.bitmap = bitmap;
         return this;
     }
 
-    public MarkerTag setImagePath(String imagePath) {
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public MyMarker setImagePath(String imagePath) {
         this.imagePath = imagePath;
         return this;
     }
@@ -74,7 +66,7 @@ public class MarkerTag {
         return noteContent;
     }
 
-    public MarkerTag setNoteContent(String noteContent) {
+    public MyMarker setNoteContent(String noteContent) {
         this.noteContent = noteContent;
         return this;
     }

@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.tom_e91.finalproj.R;
-import com.example.tom_e91.finalproj.models.MarkerTag;
+import com.example.tom_e91.finalproj.models.MyMarker;
 import com.example.tom_e91.finalproj.util.Constants;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
@@ -32,14 +32,14 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
      */
     @Override public View getInfoWindow(Marker marker) {
         View layout;
-        MarkerTag markerTag = (MarkerTag) marker.getTag();
-        if (markerTag == null) {
-            Log.d(LOG_TAG, "getInfoWindow(), markerTag is null");
+        MyMarker myMarker = (MyMarker) marker.getTag();
+        if (myMarker == null) {
+            Log.d(LOG_TAG, "getInfoWindow(), myMarker is null");
             return null;
         }
 
 
-        switch (markerTag.tag) {
+        switch (myMarker.tag) {
 
             case Constants.note:
                 layout = LayoutInflater.from(mContext).inflate(R.layout.costum_info_window_note, null);
@@ -52,7 +52,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                 }
 
                 // Set Snippet
-                String noteContent = markerTag.getNoteContent();
+                String noteContent = myMarker.getNoteContent();
                 TextView tvSnippet = (TextView) layout.findViewById(R.id.snippet);
                 if (!noteContent.equals("")) {
                     tvSnippet.setText(noteContent);
@@ -67,7 +67,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                 ImageView imageView = layout.findViewById(R.id.info_window_image);
 
                 // Set bitmap image
-                Bitmap imageBitmap = markerTag.getBitmap();
+                Bitmap imageBitmap = myMarker.getBitmap();
                 imageView.setImageBitmap(imageBitmap);
 
                 return layout;

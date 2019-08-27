@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.widget.EditText;
 
 import com.example.tom_e91.finalproj.R;
+import com.example.tom_e91.finalproj.models.MyLocation;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DateFormat;
@@ -33,15 +34,15 @@ public class util_func {
         return new LatLng(location.getLatitude(), location.getLongitude());
     }
 
-    public static boolean isNewLocation(Location currPos, Location newPos) {
+    public static boolean isNewLocation(MyLocation currPos, MyLocation newPos) {
         double tol = 0.0001;
         return (Math.abs(currPos.getLatitude() - newPos.getLatitude()) > tol || Math.abs(currPos.getLongitude() - newPos.getLongitude()) > tol);
     }
 
-    public static List<LatLng> locationsToLatLngs(List<Location> locations) {
+    public static List<LatLng> myLocationsToLatLngs(List<MyLocation> locations) {
         List<LatLng> latLngList = new ArrayList<>();
-        for (Location loc : locations)
-            latLngList.add(util_func.locationToLatLng(loc));
+        for (MyLocation myLocation : locations)
+            latLngList.add(myLocation.toLatLng());
         return latLngList;
     }
 
