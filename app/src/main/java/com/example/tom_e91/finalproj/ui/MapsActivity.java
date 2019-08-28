@@ -205,15 +205,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void setupObservers() {
 
-        repository.locations.observe(this, new Observer<List<MyLocation>>() {
+        repository.locationsLiveData.observe(this, new Observer<List<MyLocation>>() {
             @Override
             public void onChanged(@Nullable List<MyLocation> myLocations) {
                 if (myLocations != null && myLocations.size() > 0) {
-                    Log.d(LOG_TAG, "locations from DB larger than 0");
+                    Log.d(LOG_TAG, "locationsLiveData from DB larger than 0");
                     List<LatLng> latLngList = util_func.myLocationsToLatLngs(myLocations);
                     updateCamera(myLocations.get(myLocations.size() - 1));
                     mPolyline.setPoints(latLngList);
-                } else Log.d(LOG_TAG, "locations from DB is size 0");
+                } else Log.d(LOG_TAG, "locationsLiveData from DB is size 0");
             }
         });
 
@@ -317,11 +317,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    public void addMarkerToDb(MyMarker myMarker) {
+    public void addMarkerToDb(@NonNull MyMarker myMarker) {
         repository.addMarker(myMarker);
     }
 
-    public void addMarkerToMap(MyMarker marker) {
+    public void addMarkerToMap(@NonNull MyMarker marker) {
         Log.d(LOG_TAG, "addMarkerToMap() for " + marker.location);
         LatLng markerLatLng = marker.location.toLatLng();
         switch (marker.tag) {

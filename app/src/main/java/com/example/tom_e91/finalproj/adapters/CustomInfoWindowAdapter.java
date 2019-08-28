@@ -69,7 +69,6 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                 // Set bitmap image
                 Bitmap imageBitmap = myMarker.getBitmap();
                 imageView.setImageBitmap(imageBitmap);
-
                 return layout;
 
             case Constants.marker:

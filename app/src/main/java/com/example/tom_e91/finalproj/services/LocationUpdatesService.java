@@ -182,6 +182,11 @@ public class LocationUpdatesService extends Service {
     }
 
     private void onNewLocation(Location location) {
+        if (location == null) {
+            Log.d(LOG_TAG, "onNewLocation, location is null");
+            return;
+        }
+
         Log.d(LOG_TAG, "Service New location: " + location);
         mLocation = location;
         repository.addLocation(location);

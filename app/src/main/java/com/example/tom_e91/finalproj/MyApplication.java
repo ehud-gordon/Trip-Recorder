@@ -8,19 +8,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MyApplication extends Application {
     private final static String LOG_TAG = "nadir" + MyApplication.class.getSimpleName();
-    private User user = null;
-    FirebaseFirestore remoteDB;
     Repository repository;
 
     // -------------------------- LifeCycle -------------------------- //
 
     @Override public void onCreate() {
         super.onCreate();
-        remoteDB = FirebaseFirestore.getInstance();
+        FirebaseFirestore remoteDB = FirebaseFirestore.getInstance();
         repository = Repository.getInstance(remoteDB);
     }
-
-
 
     // -------------------------- Repository -------------------------- //
 
@@ -28,16 +24,11 @@ public class MyApplication extends Application {
         return repository;
     }
 
-    public FirebaseFirestore getRemoteDB() {
-        return remoteDB;
-    }
-
     // -------------------------- User -------------------------- //
 
     public void setUser(User user) {
-        this.user = user;
-        repository.setCurUser(user);
+        repository.setCurrentUser(user);
     }
 
-    public User getUser() {return user;}
+    public User getUser() {return repository.getCurrentUser();}
 }

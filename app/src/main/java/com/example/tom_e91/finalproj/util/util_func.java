@@ -35,6 +35,9 @@ public class util_func {
     }
 
     public static boolean isNewLocation(MyLocation currPos, MyLocation newPos) {
+        if (currPos == null) {
+            return true;
+        }
         double tol = 0.0001;
         return (Math.abs(currPos.getLatitude() - newPos.getLatitude()) > tol || Math.abs(currPos.getLongitude() - newPos.getLongitude()) > tol);
     }
