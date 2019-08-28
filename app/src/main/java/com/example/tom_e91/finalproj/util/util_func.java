@@ -28,6 +28,10 @@ public class util_func {
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
+    // ------------------------------- Map ------------------------------- //
+
+
+
     // ------------------------------- Location ------------------------------- //
 
     public static LatLng locationToLatLng(Location location) {

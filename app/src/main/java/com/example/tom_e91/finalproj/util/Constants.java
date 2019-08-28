@@ -8,6 +8,7 @@ public class Constants {
 
     // Permissions
     public static final int PERMISSION_LOCATION_CODE = 1;
+    public static final int PERMISSION_WRITE_EXTERNAL_CODE = 2;
 
     // Dialogs
     public static final int ERROR_DIALOG_REQUEST = 500;

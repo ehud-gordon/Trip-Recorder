@@ -67,7 +67,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                 ImageView imageView = layout.findViewById(R.id.info_window_image);
 
                 // Set bitmap image
-                Bitmap imageBitmap = myMarker.getBitmap();
+                Bitmap imageBitmap = getBitMapFromImagePath(myMarker.imagePath);
                 imageView.setImageBitmap(imageBitmap);
                 return layout;
 
@@ -83,7 +83,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         return null;
     }
 
-    private Bitmap getBitMapFromImagePath(String imagePath) {
+    private static Bitmap getBitMapFromImagePath(String imagePath) {
         return ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(imagePath), 200, 200);
     }
 }

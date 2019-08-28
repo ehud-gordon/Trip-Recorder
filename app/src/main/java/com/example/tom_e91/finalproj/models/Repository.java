@@ -105,7 +105,6 @@ public class Repository {
         currLocation.setValue(newLocation);
     }
 
-
     /**
      * add new marker to repository
      */
