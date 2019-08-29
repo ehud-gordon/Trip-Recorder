@@ -19,7 +19,7 @@ import java.util.List;
 public class MapHelper {
     public static void addMarkerToMap(GoogleMap map, @NonNull MyMarker marker) {
         LatLng markerLatLng = marker.location.toLatLng();
-        String title = marker.getTime() + " " + marker.getAddress();
+        String title = marker.getAddress() + "\n"  + marker.getTime() ;
         switch (marker.tag) {
             case Constants.marker:
                 map.addMarker(new MarkerOptions().position(markerLatLng).title(title)).setTag(marker);

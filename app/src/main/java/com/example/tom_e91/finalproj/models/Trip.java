@@ -12,6 +12,7 @@ public class Trip {
     public long startTime;
     public long endTime;
     public String durationString;
+    public float distanceTraveled; // Approximation, in meters
 
     // --------------------------------- Constructors --------------------------------- //
 
@@ -86,5 +87,13 @@ public class Trip {
 
     public void setDurationString(String durationString) {
         this.durationString = durationString;
+    }
+
+    public float getDistanceTraveled() {
+        return distanceTraveled;
+    }
+
+    public void setDistanceTraveled(float distanceTraveled) {
+        this.distanceTraveled = distanceTraveled;
     }
 }

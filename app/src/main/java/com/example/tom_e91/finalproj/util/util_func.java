@@ -37,7 +37,7 @@ public class util_func {
 
     public static String millisToDateTimeString(final long timeInMillis) {
         LocalDateTime localDateTime = new LocalDateTime(timeInMillis);
-        return localDateTime.toString("yyyy-MM-dd HH:mm:ss a", Locale.getDefault());
+        return localDateTime.toString("yyyy MMM dd, HH:mm:ss a", Locale.getDefault());
     }
 
     public static String millisToHourMinString(final long timeInMillis) {

@@ -84,7 +84,7 @@ public class Repository {
 
     public void endTrip() {
         mCurrentTrip.end();
-        mCurrentTripDocRef.set(mCurrentTrip, SetOptions.mergeFields("endTime", "durationString"));
+        mCurrentTripDocRef.set(mCurrentTrip, SetOptions.mergeFields("endTime", "durationString", "distanceTraveled"));
         mCurrentTrip.locations = locationsLiveData.getValue();
         mCurrentTrip.markers = markersLiveData.getValue();
     }
@@ -109,7 +109,6 @@ public class Repository {
                 return;
             }
         }
-
         // Updates LiveData
         List<MyLocation> tempPoints = locationsLiveData.getValue();
         tempPoints.add(newMyLocation);
@@ -118,8 +117,15 @@ public class Repository {
         // Updates remote DB
         mCurrentTripDocRef.update("locations", FieldValue.arrayUnion(newMyLocation));
 
+        // Update Trip
+        if (currLocation.getValue() != null)
+            mCurrentTrip.distanceTraveled += currLocation.getValue().distanceTo(newLocation);
+
         // Update last current location, must come at end
         currLocation.setValue(newLocation);
+
+
+
     }
 
     /**

@@ -34,6 +34,10 @@
     <string name="emailpassword_status_fmt">Email User: %1$s (verified: %2$b)</string>
     <string name="passwordless_status_fmt">Email User: %1$s (verified: %2$b)</string>
     <string name="id_fmt">User ID: %s</string>
+    <string name="summary_fmt"> &lt;b>Start:&lt;/b> %1$s &lt;br>
+                                    &lt;b>End:&lt;/b>   %2$s &lt;br>
+                                    &lt;b>Duration:&lt;/b> %3$s &lt;br>
+                                   &lt;b>Distance:&lt;/b> %4$s</string>
 
 
     <!-- Strings related to Maps -->

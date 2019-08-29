@@ -325,6 +325,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             case R.id.map_note:
                 noteEditText.setVisibility(View.VISIBLE);
+                noteEditText.requestFocus();
                 noteFinishButton.setVisibility(View.VISIBLE);
                 noteVisibility = View.VISIBLE;
                 break;
