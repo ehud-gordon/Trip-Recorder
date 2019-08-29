@@ -7,10 +7,15 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.tom_e91.finalproj.tasks.FetchAddressTask;
+import com.example.tom_e91.finalproj.util.Constants;
 import com.example.tom_e91.finalproj.util.util_func;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
@@ -35,6 +40,7 @@ public class Repository {
     // User Data
     private User mCurrentUser;
     private Trip mCurrentTrip;
+    private CollectionReference mTripsColReference;
     private DocumentReference mCurrentTripDocRef; // The Document that'll be updated in the remoteDB for this trip
 
     // ------------------------------- Constructors ------------------------------- //
@@ -56,6 +62,7 @@ public class Repository {
 
     public void setCurrentUser(User currentUser) {
         mCurrentUser = currentUser;
+        mTripsColReference =  remoteDB.collection("Users").document(mCurrentUser.getEmail()).collection("Trips");
     }
 
     public User getCurrentUser() { return mCurrentUser;}
@@ -69,7 +76,7 @@ public class Repository {
         // Create Trip Document
         String curDateTime = util_func.millisToDateTimeString(System.currentTimeMillis());
         String uniqueTripName = tripName + " " + curDateTime;
-        mCurrentTripDocRef = remoteDB.collection("Users").document(mCurrentUser.getEmail()).collection("Trips").document(uniqueTripName);
+        mCurrentTripDocRef = mTripsColReference.document(uniqueTripName);
 
         // Init LiveData
         locationsLiveData.setValue(new ArrayList<MyLocation>());
@@ -84,13 +91,17 @@ public class Repository {
 
     public void endTrip() {
         mCurrentTrip.end();
-        mCurrentTripDocRef.set(mCurrentTrip, SetOptions.mergeFields("endTime", "durationString", "distanceTraveled"));
+        mCurrentTripDocRef.set(mCurrentTrip, SetOptions.mergeFields("endTime", "durationString", "distanceTraveled", "firstPhotoPath"));
         mCurrentTrip.locations = locationsLiveData.getValue();
         mCurrentTrip.markers = markersLiveData.getValue();
     }
 
     public Trip getCurrentTrip() {
         return mCurrentTrip;
+    }
+
+    public void setCurrentTrip(final Trip trip) {
+        mCurrentTrip = trip;
     }
 
 
@@ -134,6 +145,13 @@ public class Repository {
     public void addMarker(@NonNull final MyMarker myMarker) {
         Log.d(LOG_TAG, "addMarker() new marker");
 
+        // Update Trip
+        if (myMarker.tag.equals(Constants.camera)) {
+            if (mCurrentTrip.firstPhotoPath == null) {
+                mCurrentTrip.firstPhotoPath = myMarker.imagePath;
+            }
+        }
+
         new FetchAddressTask(mAppContext, new FetchAddressTask.OnTaskCompleted() {
             @Override
             public void onTaskCompleted(String address) {
@@ -152,6 +170,15 @@ public class Repository {
         }).execute(myMarker.location);
 
 
+    }
+
+    public void getAllTrips(OnCompleteListener<QuerySnapshot> onCompleteListener) {
+        mTripsColReference.get().addOnCompleteListener(onCompleteListener).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(LOG_TAG, "getAllTrips() failed");
+            }
+        });
     }
 }
 

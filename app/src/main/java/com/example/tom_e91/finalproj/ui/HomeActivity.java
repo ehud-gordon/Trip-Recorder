@@ -83,6 +83,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                     repository.createNewTrip(tripName);
                     // Go to MapsActivity
                     startActivity(new Intent(this, MapsActivity.class));
+                    isTripNameLayout = false;
+                    finish();
                     break;
                 }
         }

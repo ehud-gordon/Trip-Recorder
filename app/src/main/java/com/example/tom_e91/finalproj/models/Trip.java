@@ -13,6 +13,7 @@ public class Trip {
     public long endTime;
     public String durationString;
     public float distanceTraveled; // Approximation, in meters
+    public String firstPhotoPath;
 
     // --------------------------------- Constructors --------------------------------- //
 
@@ -95,5 +96,13 @@ public class Trip {
 
     public void setDistanceTraveled(float distanceTraveled) {
         this.distanceTraveled = distanceTraveled;
+    }
+
+    public String getFirstPhotoPath() {
+        return firstPhotoPath;
+    }
+
+    public void setFirstPhotoPath(String firstPhotoPath) {
+        this.firstPhotoPath = firstPhotoPath;
     }
 }

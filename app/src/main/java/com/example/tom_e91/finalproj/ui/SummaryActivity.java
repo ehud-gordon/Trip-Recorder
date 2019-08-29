@@ -84,11 +84,14 @@ public class SummaryActivity extends AppCompatActivity implements OnMapReadyCall
             float distanceKM = ((float) distance) / 1000;
             distanceStr = Float.toString(distanceKM) + " km";
         }
-//        String text = getResources().getString(R.string.summary_fmt, startDate, endDate, mCurTrip.durationString, distanceStr);
         String text = getResources().getString(R.string.summary_fmt, startDate, endDate, mCurTrip.durationString, distanceStr);
         summaryTV.setText(Html.fromHtml(text));
     }
 
+    @Override public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(this, HomeActivity.class));
+    }
 
     // ------------------------------- Helpers ------------------------------- //
 
