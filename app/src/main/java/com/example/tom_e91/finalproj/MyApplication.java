@@ -15,7 +15,7 @@ public class MyApplication extends Application {
     @Override public void onCreate() {
         super.onCreate();
         FirebaseFirestore remoteDB = FirebaseFirestore.getInstance();
-        repository = Repository.getInstance(remoteDB);
+        repository = Repository.getInstance(remoteDB, getApplicationContext());
     }
 
     // -------------------------- Repository -------------------------- //

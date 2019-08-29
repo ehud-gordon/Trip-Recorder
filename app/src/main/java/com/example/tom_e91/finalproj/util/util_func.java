@@ -10,10 +10,15 @@ import com.example.tom_e91.finalproj.R;
 import com.example.tom_e91.finalproj.models.MyLocation;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.joda.time.Duration;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
+
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.Locale;
 
 public class util_func {
     private static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
@@ -28,9 +33,33 @@ public class util_func {
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
-    // ------------------------------- Map ------------------------------- //
+    // ------------------------------- Time ------------------------------- //
 
+    public static String millisToDateTimeString(final long timeInMillis) {
+        LocalDateTime localDateTime = new LocalDateTime(timeInMillis);
+        return localDateTime.toString("yyyy-MM-dd HH:mm:ss a", Locale.getDefault());
+    }
 
+    public static String millisToHourMinString(final long timeInMillis) {
+        LocalTime localTime = new LocalTime(timeInMillis);
+        return localTime.toString("HH:mm a");
+    }
+
+    public static String getFormattedDurationString(final long startTime, final long endTime) {
+        Duration duration = new Duration(startTime, endTime);
+        PeriodFormatter formatter = new PeriodFormatterBuilder()
+                .appendHours()
+                .appendSuffix(" hour", " hours")
+                .appendSeparator(", ")
+                .appendMinutes()
+                .appendSuffix(" minute", " minutes")
+                .appendSeparator(", and ")
+                .appendSeconds()
+                .appendSuffix(" second", " seconds")
+                .toFormatter();
+        String durationString = formatter.print(duration.toPeriod());
+        return durationString;
+    }
 
     // ------------------------------- Location ------------------------------- //
 
@@ -44,13 +73,6 @@ public class util_func {
         }
         double tol = 0.0001;
         return (Math.abs(currPos.getLatitude() - newPos.getLatitude()) > tol || Math.abs(currPos.getLongitude() - newPos.getLongitude()) > tol);
-    }
-
-    public static List<LatLng> myLocationsToLatLngs(List<MyLocation> locations) {
-        List<LatLng> latLngList = new ArrayList<>();
-        for (MyLocation myLocation : locations)
-            latLngList.add(myLocation.toLatLng());
-        return latLngList;
     }
 
     // ------------------------------- Service ------------------------------- //
@@ -81,7 +103,6 @@ public class util_func {
         return context.getString(R.string.location_updated,
                 DateFormat.getDateTimeInstance().format(new Date()));
     }
-
 
 
 }

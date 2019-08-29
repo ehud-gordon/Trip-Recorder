@@ -5,12 +5,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.arch.lifecycle.Observer;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -25,7 +23,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -41,6 +38,7 @@ import com.example.tom_e91.finalproj.models.MyMarker;
 import com.example.tom_e91.finalproj.models.Repository;
 import com.example.tom_e91.finalproj.services.LocationUpdatesService;
 import com.example.tom_e91.finalproj.util.Constants;
+import com.example.tom_e91.finalproj.util.MapHelper;
 import com.example.tom_e91.finalproj.util.util_func;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -49,12 +47,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CustomCap;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,8 +79,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String NOTE_VISIBILITY_KEY = "NOTE_VISIBILITY_KEY";
     private boolean drawAllMarkers = true;
     // --------------------------------- Service --------------------------------- //
-    // The BroadcastReceiver used to listen to broadcasts from the service.
-    private MyReceiver myReceiver;
     // A reference to the service used to get location updates.
     private LocationUpdatesService mService = null;
     // Tracks the bound state of the service.
@@ -124,8 +116,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (checkMapServices()) {
             Log.d(LOG_TAG, "onCreate(), checkMapServices() True");
 
-            // Service //
-            myReceiver = new MyReceiver();
 
             initActivity();
 
@@ -160,16 +150,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         bindService(new Intent(this, LocationUpdatesService.class), mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    @Override protected void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver, new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
-    }
-
-    @Override protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(myReceiver);
-        super.onPause();
-    }
-
     @Override protected void onStop() {
         if (mBound) {
             // Unbind from the service. This signals to the service that this activity is no longer
@@ -196,7 +176,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onChanged(@Nullable List<MyLocation> myLocations) {
                 if (myLocations != null && myLocations.size() > 0) {
                     Log.d(LOG_TAG, "locationsLiveData from DB larger than 0");
-                    List<LatLng> latLngList = util_func.myLocationsToLatLngs(myLocations);
+                    List<LatLng> latLngList = MapHelper.myLocationsToLatLngs(myLocations);
                     updateCamera(myLocations.get(myLocations.size() - 1));
                     mPolyline.setPoints(latLngList);
                 } else Log.d(LOG_TAG, "locationsLiveData from DB is size 0");
@@ -223,12 +203,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if (drawAllMarkers) { // Update caused by first call of onCreate
                         Log.d(LOG_TAG, "markersLiveData drawAllMarkers");
                         for (MyMarker myMarker : myMarkers) {
-                            addMarkerToMap(myMarker);
+                            MapHelper.addMarkerToMap(mMap, myMarker);
                             drawAllMarkers = false;
                         }
                     } else { // This update was caused by marker drawn
                         Log.d(LOG_TAG, "markersLiveData draw only last markers");
-                        addMarkerToMap(myMarkers.get(myMarkers.size() - 1));
+                        MapHelper.addMarkerToMap(mMap, myMarkers.get(myMarkers.size() - 1));
                     }
                 } else {
                     Log.d(LOG_TAG, "markersLiveData observe size 0!");
@@ -273,7 +253,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                    Bitmap imageBitmap = (Bitmap) extras.get("data");
 
                     // Create marker with the resulting bitmap image
-                    MyMarker myMarker = new MyMarker(Constants.camera, mCurrLocation).setImagePath(imageFilePath);
+                    MyMarker myMarker = new MyMarker(Constants.camera).setImagePath(imageFilePath);
                     addMarkerToDb(myMarker);
                 } else {
                     Toast.makeText(this, "No image was captured", Toast.LENGTH_SHORT).show();
@@ -291,12 +271,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @SuppressWarnings("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        if (mMap == null) {
+        if (googleMap == null) {
             Log.d(LOG_TAG, "onMapReady() returned null");
             makeErrorDialogToHome("Google Maps unavailable");
             return;
         }
+        mMap = googleMap;
         // Init Map
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Constants.DEFAULT_LAT_LNG, Constants.DEFAULT_ZOOM));
         mMap.getUiSettings().setMapToolbarEnabled(false);
@@ -305,45 +285,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setLocationSource(this);
         mMap.setMyLocationEnabled(true);
 
-        mPolyline = initPolyline();
+        mPolyline = MapHelper.initPolyline(mMap);
 
         // Start Observing for changes
         setupObservers();
-
-
     }
 
     public void addMarkerToDb(@NonNull MyMarker myMarker) {
+        String time = util_func.millisToHourMinString(System.currentTimeMillis());
+        myMarker = myMarker.setLocation(mCurrLocation).setTime(time);
         repository.addMarker(myMarker);
     }
 
-    public void addMarkerToMap(@NonNull MyMarker marker) {
-        Log.d(LOG_TAG, "addMarkerToMap() for " + marker.location);
-        LatLng markerLatLng = marker.location.toLatLng();
-        switch (marker.tag) {
-            case Constants.marker:
-                mMap.addMarker(new MarkerOptions().position(markerLatLng)).setTag(marker);
-                break;
-
-            case Constants.camera:
-                mMap.addMarker(new MarkerOptions().position(markerLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.camera_color25))).setTag(marker);
-                break;
-
-            case Constants.note:
-                mMap.addMarker(new MarkerOptions().position(markerLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.note20))).setTag(marker);
-                break;
-
-            case Constants.star:
-                break;
-        }
-    }
-
-    private Polyline initPolyline() {
-        Polyline polyline = mMap.addPolyline(new PolylineOptions());
-        polyline.setColor(Constants.COLOR_GREEN_ARGB);
-        polyline.setEndCap(new CustomCap(BitmapDescriptorFactory.fromResource(R.drawable.ic_arrow), 30));
-        return polyline;
-    }
 
     // ------------------------------- Sidebar ------------------------------- //
 
@@ -357,6 +310,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             case R.id.map_stop_button:
                 mService.removeLocationUpdates();
+                repository.endTrip();
                 startActivity(new Intent(this, SummaryActivity.class));
                 finish();
                 break;
@@ -380,7 +334,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
 
             case R.id.map_marker:
-                MyMarker myMarker = new MyMarker(Constants.marker, mCurrLocation);
+                MyMarker myMarker = new MyMarker(Constants.marker);
                 addMarkerToDb(myMarker);
                 break;
 
@@ -395,11 +349,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             noteEditText.setVisibility(View.INVISIBLE);
             noteFinishButton.setVisibility(View.INVISIBLE);
             noteVisibility = View.GONE;
-            MyMarker myMarker = new MyMarker(Constants.note, mCurrLocation).setNoteContent(content);
+            noteEditText.setText("");
+            MyMarker myMarker = new MyMarker(Constants.note).setNoteContent(content);
             addMarkerToDb(myMarker);
         }
     }
 
+    // TODO not used
     private void takePictureIntentBitMap() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
@@ -429,11 +385,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    // ------------------------------- utilities ------------------------------- //
-
     private void getRecommendations() {
         // TODO
+        Toast.makeText(this, "Daniel, please implement me", Toast.LENGTH_LONG).show();
     }
+
+    // ------------------------------- utilities ------------------------------- //
 
     private File createImageFile() throws IOException {
         // Create an image file name
@@ -459,7 +416,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean checkMapServices() {
         return checkGooglePlayServices() && checkGPSProvider() && requestLocationPermission();
     }
-
     private boolean checkGooglePlayServices() {
         int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
 
@@ -475,7 +431,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         return false;
     }
-
     private boolean checkGPSProvider() {
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (manager == null) {
@@ -498,7 +453,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         }
     }
-
     private boolean requestLocationPermission() {
         boolean locationPermissionGranted = isLocationPermissionGranted();
 //        Log.d(LOG_TAG, String.format("requestLocationPermission(), location granted %b", locationPermissionGranted));
@@ -507,7 +461,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return false;
         } else return true;
     }
-
     @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
@@ -541,11 +494,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
         }
     }
-
     private boolean isLocationPermissionGranted() {
         return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
-
     // ------------------------------- Location Source ------------------------------- //
     @Override public void activate(OnLocationChangedListener onLocationChangedListener) {
         mLocationChangedListener = onLocationChangedListener;
@@ -555,13 +506,4 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLocationChangedListener = null;
     }
     // ------------------------------- Service ------------------------------- //
-
-    // TODO Not Currently Used
-    private class MyReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
-            if (location != null) Log.d(LOG_TAG, "Receiver Update " + location);
-        }
-    }
 }

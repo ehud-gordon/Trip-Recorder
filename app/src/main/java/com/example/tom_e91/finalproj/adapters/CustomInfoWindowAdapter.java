@@ -45,11 +45,8 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                 layout = LayoutInflater.from(mContext).inflate(R.layout.costum_info_window_note, null);
 
                 // Set Title
-                String markerTitle = myMarker.getNoteContent();
-                TextView tvTitle = (TextView) layout.findViewById(R.id.title);
-                if (!markerTitle.equals("")) {
-                    tvTitle.setText(markerTitle);
-                }
+                setTitle((TextView) layout.findViewById(R.id.title), marker.getTitle());
+
 
                 // Set Snippet
                 String noteContent = myMarker.getNoteContent();
@@ -62,6 +59,8 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
             case Constants.camera:
                 layout = LayoutInflater.from(mContext).inflate(R.layout.custom_info_window_camera, null);
+
+                setTitle((TextView) layout.findViewById(R.id.info_window_camera_title), marker.getTitle());
 
                 // Set Image
                 ImageView imageView = layout.findViewById(R.id.info_window_image);
@@ -77,6 +76,11 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
             default:
                 return null;
         }
+    }
+
+    private static void setTitle(TextView textView, String title) {
+        if (title != null && !title.isEmpty())
+            textView.setText(title);
     }
 
     @Override public View getInfoContents(Marker marker) {

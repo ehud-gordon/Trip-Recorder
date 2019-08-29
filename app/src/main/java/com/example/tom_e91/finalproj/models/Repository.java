@@ -1,14 +1,17 @@
 package com.example.tom_e91.finalproj.models;
 
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.example.tom_e91.finalproj.tasks.FetchAddressTask;
 import com.example.tom_e91.finalproj.util.util_func;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +25,7 @@ public class Repository {
 
     private static Repository INSTANCE = null;
     private FirebaseFirestore remoteDB;
+    private Context mAppContext;
 
     // Location Data
     public MutableLiveData<List<MyLocation>> locationsLiveData = new MutableLiveData<>();
@@ -35,20 +39,20 @@ public class Repository {
 
     // ------------------------------- Constructors ------------------------------- //
 
-    private Repository(FirebaseFirestore remoteDB) {
+    // Private Ctor for singleton
+    private Repository(FirebaseFirestore remoteDB, Context appContext) {
         this.remoteDB = remoteDB;
+        mAppContext = appContext;
     }
 
-    public static synchronized Repository getInstance(FirebaseFirestore remoteDB) {
+    public static synchronized Repository getInstance(FirebaseFirestore remoteDB, Context appContext) {
         if (INSTANCE == null) {
-            INSTANCE = new Repository(remoteDB);
+            INSTANCE = new Repository(remoteDB, appContext);
         }
         return INSTANCE;
     }
 
     // ------------------------------- Getters & Setters ------------------------------- //
-
-    private FirebaseFirestore getRemoteDB() {return remoteDB; }
 
     public void setCurrentUser(User currentUser) {
         mCurrentUser = currentUser;
@@ -63,7 +67,8 @@ public class Repository {
      */
     public void createNewTrip(final String tripName) {
         // Create Trip Document
-        String uniqueTripName = tripName + Long.toString(System.currentTimeMillis());
+        String curDateTime = util_func.millisToDateTimeString(System.currentTimeMillis());
+        String uniqueTripName = tripName + " " + curDateTime;
         mCurrentTripDocRef = remoteDB.collection("Users").document(mCurrentUser.getEmail()).collection("Trips").document(uniqueTripName);
 
         // Init LiveData
@@ -71,11 +76,23 @@ public class Repository {
         markersLiveData.setValue(new ArrayList<MyMarker>());
 
         // Create Trip Object
-        mCurrentTrip = new Trip(tripName, new ArrayList<MyLocation>(), new ArrayList<MyMarker>());
+        mCurrentTrip = new Trip(tripName);
 
         // Upload Trip object to DB
         mCurrentTripDocRef.set(mCurrentTrip);
     }
+
+    public void endTrip() {
+        mCurrentTrip.end();
+        mCurrentTripDocRef.set(mCurrentTrip, SetOptions.mergeFields("endTime", "durationString"));
+        mCurrentTrip.locations = locationsLiveData.getValue();
+        mCurrentTrip.markers = markersLiveData.getValue();
+    }
+
+    public Trip getCurrentTrip() {
+        return mCurrentTrip;
+    }
+
 
     // ------------------------------- DB Operations ------------------------------- //
 
@@ -111,13 +128,24 @@ public class Repository {
     public void addMarker(@NonNull final MyMarker myMarker) {
         Log.d(LOG_TAG, "addMarker() new marker");
 
-        // Updates LiveData
-        List<MyMarker> tempMarkers = markersLiveData.getValue();
-        tempMarkers.add(myMarker);
-        markersLiveData.setValue(tempMarkers);
+        new FetchAddressTask(mAppContext, new FetchAddressTask.OnTaskCompleted() {
+            @Override
+            public void onTaskCompleted(String address) {
+                if (!address.isEmpty())
+                    myMarker.address = address;
+                else
+                    Log.d(LOG_TAG, "address is empty");
+                // Updates LiveData
+                List<MyMarker> tempMarkers = markersLiveData.getValue();
+                tempMarkers.add(myMarker);
+                markersLiveData.setValue(tempMarkers);
 
-        // Updates remote DB
-        mCurrentTripDocRef.update("markers", FieldValue.arrayUnion(myMarker));
+                // Updates remote DB
+                mCurrentTripDocRef.update("markers", FieldValue.arrayUnion(myMarker));
+            }
+        }).execute(myMarker.location);
+
+
     }
 }
 

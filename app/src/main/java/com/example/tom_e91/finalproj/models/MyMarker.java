@@ -6,6 +6,9 @@ import android.support.annotation.NonNull;
 public class MyMarker {
     public String tag;
     public MyLocation location;
+    public String address;
+
+    public String time;
 
     // In case this is a camera-marker
     public Bitmap bitmap;
@@ -17,6 +20,10 @@ public class MyMarker {
     // ------------------------------- Constructors ------------------------------- //
 
     public MyMarker() {}
+
+    public MyMarker (@NonNull String tag) {
+        this.tag = tag;
+    }
 
     public MyMarker(@NonNull String tag, MyLocation location) {
         this.tag = tag;
@@ -68,6 +75,26 @@ public class MyMarker {
 
     public MyMarker setNoteContent(String noteContent) {
         this.noteContent = noteContent;
+        return this;
+    }
+
+    public String getAddress() {
+        if (address == null)
+            return "";
+        return address;
+    }
+
+    public MyMarker setAddress(String address) {
+        this.address = address;
+        return this;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public MyMarker setTime(String time) {
+        this.time = time;
         return this;
     }
 }

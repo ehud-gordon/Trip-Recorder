@@ -1,114 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:weightSum="100">
+    android:orientation="vertical">
 
-    <android.support.constraint.ConstraintLayout
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="90">
+        tools:context=".ui.MapActivity" />
 
-        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context=".ui.MapActivity" />
-
-        <LinearLayout
-            android:id="@+id/linearLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:elevation="2dp"
-            android:gravity="center_vertical"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/map_marker"
-                android:layout_width="35dp"
-                android:layout_height="36dp"
-                android:contentDescription="marker icon"
-                app:srcCompat="@mipmap/marker_foreground" />
-
-            <ImageView
-                android:id="@+id/map_note"
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:contentDescription="@string/note_icon"
-                app:srcCompat="@drawable/note" />
-
-            <ImageView
-                android:id="@+id/map_camera"
-                android:layout_width="match_parent"
-                android:layout_height="38dp"
-                android:contentDescription="@string/camera_icon"
-                app:srcCompat="@drawable/camera_color" />
-
-            <ImageView
-                android:id="@+id/map_star"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:contentDescription="star icon"
-                app:srcCompat="@android:drawable/btn_star_big_on" />
-
-        </LinearLayout>
-
-        <EditText
-            android:id="@+id/note_edit_text"
-            android:layout_width="391dp"
-            android:layout_height="148dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:background="#f6e366"
-            android:elevation="2dp"
-            android:ems="10"
-            android:gravity="top|start"
-            android:hint="Enter a Note.."
-            android:inputType="text|textEmailAddress|textShortMessage|textPersonName"
-            android:visibility="invisible"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.502"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <Button
-            android:id="@+id/note_finish_button"
-            android:layout_width="wrap_content"
-            android:layout_height="37dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:elevation="2dp"
-            android:text="Finish"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/map"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/note_edit_text"
-            app:layout_constraintVertical_bias="0.135" />
-
-
-
-    </android.support.constraint.ConstraintLayout>
-
-
-    <ImageButton
-        android:id="@+id/map_stop_button"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="10"
-        android:background="@color/colorPrimary"
-        app:srcCompat="@mipmap/stop_button" />
+        android:layout_marginStart="8dp"
+        android:elevation="2dp"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-</LinearLayout>
+        <ImageView
+            android:id="@+id/map_marker"
+            android:layout_width="35dp"
+            android:layout_height="36dp"
+            android:contentDescription="marker icon"
+            app:srcCompat="@mipmap/marker_foreground" />
+
+        <ImageView
+            android:id="@+id/map_note"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:contentDescription="@string/note_icon"
+            app:srcCompat="@drawable/note" />
+
+        <ImageView
+            android:id="@+id/map_camera"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:contentDescription="@string/camera_icon"
+            app:srcCompat="@drawable/camera_color" />
+
+        <ImageView
+            android:id="@+id/map_star"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="star icon"
+            app:srcCompat="@android:drawable/btn_star_big_on" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/note_edit_text"
+        android:layout_width="412dp"
+        android:layout_height="180dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:background="#f6e366"
+        android:elevation="2dp"
+        android:ems="10"
+        android:gravity="top|start"
+        android:hint="Enter a Note.."
+        android:inputType="text|textEmailAddress|textShortMessage|textPersonName"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.417"
+        app:layout_constraintStart_toEndOf="@+id/linearLayout"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/note_finish_button"
+        android:layout_width="wrap_content"
+        android:layout_height="37dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:elevation="2dp"
+        android:text="Finish"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/map"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/note_edit_text"
+        app:layout_constraintVertical_bias="0.177" />
+
+    <ImageView
+        android:id="@+id/map_stop_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/red_stop_button5" />
+
+
+</android.support.constraint.ConstraintLayout>
+
+

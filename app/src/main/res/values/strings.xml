@@ -53,6 +53,7 @@
     <string name="location_updated">Location Updated: %1$s</string>
     <string name="launch_activity">Launch activity</string>
     <string name="failed_to_create">failed to create new account</string>
+    <string name="stop_button">stop_button</string>
 
 
 </resources>
